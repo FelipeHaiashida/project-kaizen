@@ -261,7 +261,7 @@
       "epic": "E5",
       "title": "Visualização Calendário",
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "description": "Visualização de tarefas em formato de calendário mensal.",
       "acceptanceCriteria": [
         "Calendário mensal com navegação por mês",

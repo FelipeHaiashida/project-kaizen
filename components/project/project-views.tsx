@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { LayoutGrid, List as ListIcon } from "lucide-react";
+import { CalendarDays, LayoutGrid, List as ListIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { TaskListView } from "@/components/task/task-list-view";
 import { BoardView } from "@/components/task/board-view";
+import { CalendarView } from "@/components/task/calendar-view";
 import type {
   TaskViewItem,
   StatusOption,
@@ -15,7 +16,7 @@ import type {
   ListRef,
 } from "@/components/task/types";
 
-type View = "list" | "board";
+type View = "list" | "board" | "calendar";
 
 export interface ProjectViewsProps {
   projectId: string;
@@ -30,6 +31,7 @@ export interface ProjectViewsProps {
 const TABS: { key: View; label: string; icon: typeof ListIcon }[] = [
   { key: "list", label: "Lista", icon: ListIcon },
   { key: "board", label: "Board", icon: LayoutGrid },
+  { key: "calendar", label: "Calendário", icon: CalendarDays },
 ];
 
 export function ProjectViews(props: ProjectViewsProps) {
@@ -60,6 +62,7 @@ export function ProjectViews(props: ProjectViewsProps) {
 
       {view === "list" && <TaskListView {...props} />}
       {view === "board" && <BoardView {...props} />}
+      {view === "calendar" && <CalendarView {...props} />}
     </div>
   );
 }
