@@ -52,6 +52,7 @@ export function CalendarView({
   members,
   projectTags,
   projectFields,
+  currentUserId,
 }: {
   projectId: string;
   lists: ListRef[];
@@ -60,6 +61,7 @@ export function CalendarView({
   members: MemberOption[];
   projectTags: TagRef[];
   projectFields: ProjectField[];
+  currentUserId: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -242,6 +244,7 @@ export function CalendarView({
           members={members}
           projectTags={projectTags}
           projectFields={projectFields}
+          currentUserId={currentUserId}
           open={!!openTask}
           onOpenChange={(o) => !o && setOpenTaskId(null)}
         />

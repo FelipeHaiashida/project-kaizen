@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { UserAvatar } from "@/components/user-avatar";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { TaskAttachments } from "@/components/task/task-attachments";
+import { TaskComments } from "@/components/task/task-comments";
 import type {
   TaskListItem,
   StatusOption,
@@ -36,6 +37,7 @@ export function TaskDetailSheet({
   members,
   projectTags,
   projectFields,
+  currentUserId,
   open,
   onOpenChange,
 }: {
@@ -45,6 +47,7 @@ export function TaskDetailSheet({
   members: MemberOption[];
   projectTags: TagRef[];
   projectFields: ProjectField[];
+  currentUserId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -336,6 +339,8 @@ export function TaskDetailSheet({
             className="h-8 text-sm"
           />
         </div>
+
+        <TaskComments taskId={task.id} members={members} currentUserId={currentUserId} />
 
         <div className="mt-auto flex items-center justify-between border-t pt-4">
           <Button variant="ghost" size="sm" onClick={onDelete} disabled={isPending}>

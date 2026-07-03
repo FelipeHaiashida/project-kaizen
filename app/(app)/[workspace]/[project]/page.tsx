@@ -144,6 +144,7 @@ export default async function ProjectPage({
         members={members}
         projectTags={projectTags}
         projectFields={projectFields}
+        currentUserId={session.user.id}
       />
     </div>
   );

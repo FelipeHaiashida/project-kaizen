@@ -42,7 +42,8 @@ Registrar aprendizados em `progress.txt` (ler a seção **Codebase Patterns** no
 - Tarefas: `@/lib/actions/task`. Cria com o 1º status; "concluído" = último status (maior `order`). Prioridade meta em `@/lib/tasks`.
 - Descrição de tarefa/comentário = rich text **TipTap** (`@/components/ui/rich-text-editor`, client-only, `immediatelyRender:false`), salvo como HTML.
 - **Não rodar `npm run build` com o preview (dev server) rodando** — corrompe o `.next`. Parar preview antes.
-- A página do projeto usa `TaskListView` (`@/components/task/task-list-view`): agrupar por lista/status, filtros, ordenação, colunas, seleção múltipla (`@/lib/actions/task-bulk`). Tags/campos/anexos ficam no `TaskDetailSheet`. Gerenciar tags/campos em `/[workspace]/[project]/settings`.
+- A página do projeto usa `ProjectViews` (`@/components/project/project-views`) com abas **Lista** (`task-list-view`), **Board** (`board-view`, kanban dnd) e **Calendário** (`calendar-view`). Todas compartilham os mesmos dados e abrem o `TaskDetailSheet`. Seleção múltipla/bulk em `@/lib/actions/task-bulk`. Tags/campos/anexos/comentários no `TaskDetailSheet`. Gerenciar tags/campos em `/[workspace]/[project]/settings`.
+- **Comentários (S14):** `@/lib/actions/comment`, editor com menções `@/components/task/comment-editor` (TipTap + mention). **Realtime** via `@/lib/supabase/client` (browser, anon) inscrito em `postgres_changes` da tabela `Comment`. Tabela `Comment` está na publicação `supabase_realtime` com `REPLICA IDENTITY FULL`. Tabelas sem RLS (ok interno; habilitar RLS antes de produção pública).
 
 ## Variáveis de ambiente
 

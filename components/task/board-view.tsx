@@ -163,6 +163,7 @@ export function BoardView({
   members,
   projectTags,
   projectFields,
+  currentUserId,
 }: {
   projectId: string;
   lists: ListRef[];
@@ -171,6 +172,7 @@ export function BoardView({
   members: MemberOption[];
   projectTags: TagRef[];
   projectFields: ProjectField[];
+  currentUserId: string;
 }) {
   const router = useRouter();
   const [fAssignee, setFAssignee] = useState("");
@@ -362,6 +364,7 @@ export function BoardView({
           members={members}
           projectTags={projectTags}
           projectFields={projectFields}
+          currentUserId={currentUserId}
           open={!!openTask}
           onOpenChange={(o) => !o && setOpenTaskId(null)}
         />

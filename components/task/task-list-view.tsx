@@ -184,6 +184,7 @@ export function TaskListView({
   members,
   projectTags,
   projectFields,
+  currentUserId,
 }: {
   projectId: string;
   lists: ListRef[];
@@ -192,6 +193,7 @@ export function TaskListView({
   members: MemberOption[];
   projectTags: TagRef[];
   projectFields: ProjectField[];
+  currentUserId: string;
 }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -579,6 +581,7 @@ export function TaskListView({
           members={members}
           projectTags={projectTags}
           projectFields={projectFields}
+          currentUserId={currentUserId}
           open={!!openTask}
           onOpenChange={(o) => !o && setOpenTaskId(null)}
         />

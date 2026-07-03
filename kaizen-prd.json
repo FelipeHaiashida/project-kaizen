@@ -277,7 +277,7 @@
       "epic": "E6",
       "title": "Comentários em tarefas",
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "description": "Seção de comentários no detalhe da tarefa com rich text e menções.",
       "acceptanceCriteria": [
         "Editor de comentários com rich text básico (negrito, itálico, código, listas)",

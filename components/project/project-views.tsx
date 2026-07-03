@@ -26,6 +26,7 @@ export interface ProjectViewsProps {
   members: MemberOption[];
   projectTags: TagRef[];
   projectFields: ProjectField[];
+  currentUserId: string;
 }
 
 const TABS: { key: View; label: string; icon: typeof ListIcon }[] = [
