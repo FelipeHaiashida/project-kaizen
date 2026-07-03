@@ -293,7 +293,7 @@
       "epic": "E6",
       "title": "Notificações",
       "priority": 15,
-      "passes": false,
+      "passes": true,
       "description": "Sistema de notificações in-app para atividades relevantes.",
       "acceptanceCriteria": [
         "Sino de notificações no header com badge de contagem",

@@ -1,7 +1,9 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { getActiveWorkspace } from "@/lib/workspace";
+import { notify } from "@/lib/notifications";
 import { createTaskSchema, updateTaskSchema } from "@/lib/validations/task";
 
 export type TaskActionState = { error?: string; success?: string; taskId?: string };
@@ -80,6 +82,14 @@ export async function updateTask(taskId: string, values: unknown): Promise<TaskA
     validAssignees = members.map((m) => m.userId);
   }
 
+  const session = await auth();
+  const actorId = session?.user?.id;
+  const before = await db.task.findUnique({
+    where: { id: taskId },
+    select: { statusId: true, assignees: { select: { userId: true } } },
+  });
+  const oldAssignees = before?.assignees.map((a) => a.userId) ?? [];
+
   await db.taskAssignee.deleteMany({ where: { taskId } });
   if (validAssignees.length > 0) {
     await db.taskAssignee.createMany({
@@ -99,6 +109,30 @@ export async function updateTask(taskId: string, values: unknown): Promise<TaskA
     },
   });
 
+  // Notifica novos responsáveis
+  const added = validAssignees.filter((id) => !oldAssignees.includes(id));
+  for (const uid of added) {
+    await notify({
+      userId: uid,
+      type: "TASK_ASSIGNED",
+      message: `Você foi atribuído à tarefa "${title}"`,
+      taskId,
+      actorId,
+    });
+  }
+  // Notifica mudança de status aos responsáveis
+  if (before && before.statusId !== statusId) {
+    for (const uid of validAssignees) {
+      await notify({
+        userId: uid,
+        type: "STATUS_CHANGED",
+        message: `"${title}" mudou para ${status.name}`,
+        taskId,
+        actorId,
+      });
+    }
+  }
+
   return { success: "Tarefa atualizada" };
 }
 
@@ -112,7 +146,25 @@ export async function setTaskStatus(taskId: string, statusId: string): Promise<T
   });
   if (!status) return { error: "Status inválido" };
 
+  const before = await db.task.findUnique({
+    where: { id: taskId },
+    select: { statusId: true, title: true, assignees: { select: { userId: true } } },
+  });
+
   await db.task.update({ where: { id: taskId }, data: { statusId } });
+
+  if (before && before.statusId !== statusId) {
+    const session = await auth();
+    for (const a of before.assignees) {
+      await notify({
+        userId: a.userId,
+        type: "STATUS_CHANGED",
+        message: `"${before.title}" mudou para ${status.name}`,
+        taskId,
+        actorId: session?.user?.id,
+      });
+    }
+  }
   return { success: "Status atualizado" };
 }
 

@@ -182,3 +182,11 @@
 - `components/task/task-comments.tsx`: lista (avatar, nome, tempo relativo, HTML), reações (grupos + picker de emoji), editar inline, excluir. **Realtime Supabase**: cliente browser em `lib/supabase/client.ts` (anon key); inscreve `postgres_changes` na tabela `Comment` filtrando `taskId=eq.X` → recarrega via server action. Habilitado no banco: `ALTER PUBLICATION supabase_realtime ADD TABLE "Comment"` + `REPLICA IDENTITY FULL`.
 - **currentUserId** é passado da página → ProjectViews → cada view → TaskDetailSheet → TaskComments (para saber comentários próprios).
 - **Segurança/realtime:** as tabelas (criadas via Prisma) estão SEM RLS, então o realtime entrega ao anon. OK para uso interno; em produção convém habilitar RLS + políticas (e o realtime broadcast de mudanças ficaria restrito). Documentar antes de abrir ao público.
+
+## S15 Notificações
+- Model NotificationSettings (1:1 User, 4 booleans, default true). Realtime habilitado na tabela Notification (publicação + REPLICA IDENTITY FULL).
+- `lib/notifications.ts` notify({userId,type,message,taskId,actorId}) respeita settings e não notifica a si mesmo; extractMentionIds(html) lê data-id das menções TipTap.
+- Disparos: updateTask (TASK_ASSIGNED p/ novos responsáveis, STATUS_CHANGED em mudança), setTaskStatus (STATUS_CHANGED), createComment (MENTIONED). DUE_SOON gerado sob demanda em getNotifications->ensureDueSoonNotifications (tarefas do user que vencem em 24h; sem cron).
+- `NotificationBell` no header (realtime via supabaseBrowser, badge de não lidas, dropdown, marcar lida/todas). `/settings/notifications` com toggles.
+- **Radix DropdownMenu abre no `pointerdown`** — no preview, disparar `PointerEvent('pointerdown')`+`pointerup`+`click` para abrir (o `.click()` puro não abre; o `preview_click` às vezes também não). Guardar isto.
+- **Estado stale no preview:** ao togglar um chip (setState) e clicar salvar no MESMO eval, o save usa estado velho (React ainda não re-renderizou). Fazer toggle e save em evals SEPARADOS.

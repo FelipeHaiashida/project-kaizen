@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
 import { WorkspaceSwitcher } from "@/components/workspace/workspace-switcher";
 import { ProjectsNav } from "@/components/project/projects-nav";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -59,6 +60,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
       <div className="flex flex-1 flex-col">
         <header className="flex items-center justify-end gap-3 border-b px-6 py-3">
+          <NotificationBell userId={session.user.id} />
           <Link
             href="/settings/profile"
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"

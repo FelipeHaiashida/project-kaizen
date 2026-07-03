@@ -25,6 +25,16 @@ model User {
   comments        Comment[]
   notifications   Notification[]
   invitationsSent Invitation[]      @relation("InvitedBy")
+  notificationSettings NotificationSettings?
+}
+
+model NotificationSettings {
+  userId        String  @id
+  taskAssigned  Boolean @default(true)
+  mentioned     Boolean @default(true)
+  dueSoon       Boolean @default(true)
+  statusChanged Boolean @default(true)
+  user          User    @relation(fields: [userId], references: [id])
 }
 
 model Workspace {

@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getActiveWorkspace } from "@/lib/workspace";
+import { notify, extractMentionIds } from "@/lib/notifications";
 
 export type CommentActionState = { error?: string; success?: string };
 
@@ -62,6 +63,22 @@ export async function createComment(taskId: string, content: string): Promise<Co
   if (content.length > 20000) return { error: "Comentário muito longo" };
 
   await db.comment.create({ data: { taskId, userId: session.user.id, content } });
+
+  // Notifica menções (@membro)
+  const mentioned = extractMentionIds(content);
+  if (mentioned.length > 0) {
+    const author = session.user.name ?? "Alguém";
+    const t = await db.task.findUnique({ where: { id: taskId }, select: { title: true } });
+    for (const uid of mentioned) {
+      await notify({
+        userId: uid,
+        type: "MENTIONED",
+        message: `${author} mencionou você em "${t?.title ?? "uma tarefa"}"`,
+        taskId,
+        actorId: session.user.id,
+      });
+    }
+  }
   return { success: "Comentário publicado" };
 }
 
