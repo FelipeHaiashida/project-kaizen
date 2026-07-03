@@ -209,7 +209,7 @@
       "epic": "E4",
       "title": "Anexos em tarefas",
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "description": "Upload e visualização de arquivos anexados às tarefas.",
       "acceptanceCriteria": [
         "Upload de arquivos via drag-drop ou botão no detalhe da tarefa",

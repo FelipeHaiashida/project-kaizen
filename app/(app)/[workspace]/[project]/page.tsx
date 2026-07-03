@@ -60,6 +60,10 @@ export default async function ProjectPage({
               assignees: { select: { user: { select: { id: true, name: true, image: true } } } },
               tags: { select: { tag: { select: { id: true, name: true, color: true } } } },
               fieldValues: { select: { fieldId: true, value: true } },
+              attachments: {
+                orderBy: { createdAt: "desc" },
+                select: { id: true, name: true, url: true, size: true, createdAt: true },
+              },
               subtasks: {
                 orderBy: { order: "asc" },
                 select: { id: true, title: true, statusId: true },
@@ -98,6 +102,13 @@ export default async function ProjectPage({
       assignees: t.assignees.map((a) => a.user),
       tags: t.tags.map((tt) => tt.tag),
       fieldValues: t.fieldValues,
+      attachments: t.attachments.map((a) => ({
+        id: a.id,
+        name: a.name,
+        url: a.url,
+        size: a.size,
+        createdAt: a.createdAt.toISOString(),
+      })),
       subtasks: t.subtasks,
     }));
     counts[list.id] = tasks.length;

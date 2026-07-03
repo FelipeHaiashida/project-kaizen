@@ -14,6 +14,14 @@ export type SubtaskItem = {
   statusId: string;
 };
 
+export type AttachmentItem = {
+  id: string;
+  name: string;
+  url: string;
+  size: number;
+  createdAt: string; // ISO
+};
+
 export type TaskListItem = {
   id: string;
   title: string;
@@ -26,5 +34,6 @@ export type TaskListItem = {
   assignees: TaskAssignee[];
   tags: TagRef[];
   fieldValues: TaskFieldValue[];
+  attachments: AttachmentItem[];
   subtasks: SubtaskItem[];
 };

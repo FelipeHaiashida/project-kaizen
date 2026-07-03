@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserAvatar } from "@/components/user-avatar";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { TaskAttachments } from "@/components/task/task-attachments";
 import type {
   TaskListItem,
   StatusOption,
@@ -289,6 +290,8 @@ export function TaskDetailSheet({
           <Label className="text-xs text-muted-foreground">Descrição</Label>
           <RichTextEditor value={description} onChange={setDescription} />
         </div>
+
+        <TaskAttachments taskId={task.id} attachments={task.attachments} />
 
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">
