@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function LoginForm() {
+export function LoginForm({ redirectTo }: { redirectTo?: string }) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -27,7 +27,7 @@ export function LoginForm() {
   function onSubmit(values: LoginInput) {
     setError(null);
     startTransition(async () => {
-      const result = await authenticate(values);
+      const result = await authenticate(values, redirectTo);
       if (result?.error) setError(result.error);
     });
   }
@@ -65,7 +65,12 @@ export function LoginForm() {
       </Button>
       <p className="text-center text-sm text-muted-foreground">
         Não tem conta?{" "}
-        <Link href="/register" className="font-medium text-primary hover:underline">
+        <Link
+          href={
+            redirectTo ? `/register?callbackUrl=${encodeURIComponent(redirectTo)}` : "/register"
+          }
+          className="font-medium text-primary hover:underline"
+        >
           Criar conta
         </Link>
       </p>

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Criar conta · Kaizen",
 };
 
-export default function RegisterPage() {
+export default function RegisterPage({ searchParams }: { searchParams: { callbackUrl?: string } }) {
   return (
     <Card>
       <CardHeader>
@@ -15,7 +15,7 @@ export default function RegisterPage() {
         <CardDescription>Comece a organizar o trabalho da sua equipe</CardDescription>
       </CardHeader>
       <CardContent>
-        <RegisterForm />
+        <RegisterForm redirectTo={searchParams.callbackUrl} />
       </CardContent>
     </Card>
   );

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function RegisterForm() {
+export function RegisterForm({ redirectTo }: { redirectTo?: string }) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -27,7 +27,7 @@ export function RegisterForm() {
   function onSubmit(values: RegisterInput) {
     setError(null);
     startTransition(async () => {
-      const result = await registerUser(values);
+      const result = await registerUser(values, redirectTo);
       if (result?.error) setError(result.error);
     });
   }
@@ -77,7 +77,10 @@ export function RegisterForm() {
       </Button>
       <p className="text-center text-sm text-muted-foreground">
         Já tem conta?{" "}
-        <Link href="/login" className="font-medium text-primary hover:underline">
+        <Link
+          href={redirectTo ? `/login?callbackUrl=${encodeURIComponent(redirectTo)}` : "/login"}
+          className="font-medium text-primary hover:underline"
+        >
           Entrar
         </Link>
       </p>

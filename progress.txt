@@ -42,7 +42,10 @@
   - Server Actions de workspace em `lib/actions/workspace.ts`: create/update/switch/removeMember/getInviteToken.
   - **Storage genérico:** `lib/storage.ts` `uploadImage(bucket, path, file)` (reusa o admin client). Bucket `workspace-logos` (público) para logos.
   - **Link de convite (S04):** `getInviteToken()` cria/reaproveita uma `Invitation` **aberta** (email=null) válida 7 dias e o client monta `${origin}/invite/${token}`. O model `Invitation.email` virou opcional pra suportar link aberto (S04) e convite por email (S05). A página `/invite/[token]` de aceite é da S05.
-- **Radix dropdown não abre com `.click()` sintético** no preview — usar `preview_click` (evento real) no trigger; depois os `[role=menuitem]` podem ser lidos/clicados via `preview_eval`. Para `window.confirm` em testes, sobrescrever `window.confirm = () => true` antes de clicar. Navegação no preview: `preview_eval` com `window.location.href=...` (não há tool de navigate).
+- **Radix dropdown não abre com `.click()` sintético** no preview — usar `preview_click` (evento real) no trigger; depois os `[role=menuitem]` podem ser lidos/clicados via `preview_eval`. Para `window.confirm` em testes, sobrescrever `window.confirm = () => true` antes de clicar. Navegação no preview: `preview_eval` com `window.location.href=...` (não há tool de navigate). **Radix Dialog trigger** (asChild Button), por outro lado, **abre com `.click()` sintético** via `preview_eval`.
+- **Email (Resend):** `lib/email.ts` — client só instanciado se `RESEND_API_KEY` existe; `sendInvitationEmail` **nunca lança** (retorna `{sent, error}`) pra não quebrar o fluxo se o email falhar. Remetente via `EMAIL_FROM` (padrão `onboarding@resend.dev`). **Modo teste da Resend (sem domínio verificado) só entrega pro email dono da conta** — envio pra terceiros dá 403; por isso as Server Actions criam o convite mesmo se o email falhar e devolvem o link pra copiar. Para produção: verificar domínio em resend.com/domains e trocar `EMAIL_FROM`.
+- **Convites:** `Invitation.email` = null → link aberto (S04, reusável, não consome); email preenchido → convite direcionado de **uso único** (marca `acceptedAt` ao aceitar). Actions em `lib/actions/invitation.ts`: `inviteMember`, `revokeInvitation`, `acceptInvitation`. Página pública `/invite/[token]` valida (inexistente/aceito/expirado) e, deslogado, manda pra `/login|/register?callbackUrl=/invite/token`.
+- **`redirectTo`/`callbackUrl` no auth:** `authenticate`/`registerUser` aceitam `redirectTo` opcional (sanitizado por `safeRedirect` — só caminhos internos). Páginas `login`/`register` leem `searchParams.callbackUrl`. É assim que o fluxo "aceitar convite como novo usuário" volta pro convite após registrar/entrar.
 - **Singleton do Prisma:** importar `{ db }` de `lib/db.ts` (NÃO instanciar `new PrismaClient()` avulso).
 - **Tipos globais:** importar de `@/types` (reexporta models/enums do Prisma).
 - **Convenções:** arquivos em kebab-case, componentes em PascalCase. Rotas autenticadas em `/(app)/`, públicas `/login` `/register` `/invite/[token]`. Mutations via Server Actions. Validação com Zod.
@@ -114,4 +117,17 @@
 - **Checks:** typecheck ✓, lint ✓, build ✓ (11 rotas), format ✓.
 - **Verificação funcional (preview + DB):** registro → redirect p/ onboarding ✓; slug auto ("Time Kaizen"→"time-kaizen") ✓; criar workspace → OWNER membership no banco + redirect p/ dashboard com sidebar ✓; editar nome+slug persistiu (cookie atualizado) ✓; copiar convite cria Invitation aberta e reaproveita no 2º clique ✓; remover membro (Owner removeu Member) ✓; switcher lista 2 workspaces e troca ativa (cookie `kaizen.ws`) ✓. Dados de teste removidos ao final.
 - **Learnings:** ver **Codebase Patterns** (bloco Multi-tenant / Workspaces e o de Radix dropdown no preview).
+---
+
+## 2026-07-03 - S05 - Convite de membros por email
+- Modal de convite (`InviteMemberDialog`, Radix Dialog) com email + papel (Admin/Membro) na página `/settings/workspace`.
+- Server Actions em `lib/actions/invitation.ts`: `inviteMember` (cria/reaproveita Invitation, envia email via Resend, TTL 7 dias), `revokeInvitation`, `acceptInvitation` (adiciona membro, marca aceito, seta workspace ativo, redireciona).
+- Email via **Resend** (`lib/email.ts`) com HTML do convite e fallback gracioso (não quebra se o email falhar).
+- Página pública `/invite/[token]`: valida inválido/aceito/expirado; deslogado → botões Entrar/Criar conta com `callbackUrl` de volta; logado → botão Aceitar.
+- Suporte a `redirectTo`/`callbackUrl` no login/registro (para voltar ao convite). Convites pendentes listados no card de membros com botão de cancelar.
+- Componentes novos: `components/ui/dialog.tsx`, `components/workspace/{invite-member-dialog,revoke-invitation-button,accept-invitation-button}.tsx`. Validação `lib/validations/invitation.ts`.
+- **Files changed:** lib/email.ts, lib/actions/invitation.ts, lib/validations/invitation.ts, app/invite/[token]/page.tsx, app/(app)/settings/workspace/page.tsx, app/(auth)/{actions.ts,login/page.tsx,register/page.tsx}, components/auth/{login,register}-form.tsx, components/ui/dialog.tsx, components/workspace/{invite-member-dialog,revoke-invitation-button,accept-invitation-button}.tsx, package.json.
+- **Checks:** typecheck ✓, lint ✓, build ✓ (10 rotas), format ✓.
+- **Verificação funcional (preview + DB + Resend):** convite pelo modal cria Invitation pendente e aparece na lista ✓; **Resend chamada de verdade** (403 esperado no modo teste — só entrega ao dono da conta; fallback ok) ✓; fluxo completo: novo usuário abre link → cria conta (callbackUrl) → volta ao convite → **aceita e vira MEMBER** ✓; convite de email vira uso único (link mostra "indisponível" depois) ✓; convite expirado → "indisponível" ✓. Dados de teste removidos.
+- **Learnings:** ver **Codebase Patterns** (blocos Email/Resend, Convites, redirectTo/callbackUrl).
 ---

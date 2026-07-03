@@ -9,11 +9,17 @@ import { loginSchema, registerSchema } from "@/lib/validations/auth";
 
 export type ActionResult = { error: string } | undefined;
 
+/** Só permite caminhos internos relativos (evita open redirect). */
+function safeRedirect(target?: string): string {
+  if (target && target.startsWith("/") && !target.startsWith("//")) return target;
+  return "/dashboard";
+}
+
 /**
  * Registra um novo usuário (senha com bcrypt) e já autentica, redirecionando
- * para /dashboard. Retorna `{ error }` em caso de falha de validação/negócio.
+ * para `redirectTo` (padrão /dashboard). Retorna `{ error }` em caso de falha.
  */
-export async function registerUser(values: unknown): Promise<ActionResult> {
+export async function registerUser(values: unknown, redirectTo?: string): Promise<ActionResult> {
   const parsed = registerSchema.safeParse(values);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
@@ -36,7 +42,7 @@ export async function registerUser(values: unknown): Promise<ActionResult> {
     await signIn("credentials", {
       email: normalizedEmail,
       password,
-      redirectTo: "/dashboard",
+      redirectTo: safeRedirect(redirectTo),
     });
   } catch (error) {
     if (error instanceof AuthError) {
@@ -49,7 +55,7 @@ export async function registerUser(values: unknown): Promise<ActionResult> {
 /**
  * Autentica com email/senha. Retorna `{ error }` em caso de credenciais inválidas.
  */
-export async function authenticate(values: unknown): Promise<ActionResult> {
+export async function authenticate(values: unknown, redirectTo?: string): Promise<ActionResult> {
   const parsed = loginSchema.safeParse(values);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
@@ -59,7 +65,7 @@ export async function authenticate(values: unknown): Promise<ActionResult> {
     await signIn("credentials", {
       email: parsed.data.email.toLowerCase(),
       password: parsed.data.password,
-      redirectTo: "/dashboard",
+      redirectTo: safeRedirect(redirectTo),
     });
   } catch (error) {
     if (error instanceof AuthError) {

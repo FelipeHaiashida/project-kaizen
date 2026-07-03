@@ -128,7 +128,7 @@
       "epic": "E2",
       "title": "Convite de membros por email",
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "description": "Admin pode convidar pessoas por email para o workspace.",
       "acceptanceCriteria": [
         "Modal de convite com campo de email e seleção de papel",

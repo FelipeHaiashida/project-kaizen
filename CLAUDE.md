@@ -32,6 +32,8 @@ Registrar aprendizados em `progress.txt` (ler a seção **Codebase Patterns** no
 - O shell logado (`app/(app)/layout.tsx`) redireciona pra `/onboarding` quem não tem workspace.
 - Papéis: use `canManageWorkspaceRole`/`ROLE_LABELS` de `@/lib/roles` (puro, ok no client). `lib/workspace.ts` é server-only.
 - Upload de imagem: `uploadImage(bucket, path, file)` de `@/lib/storage`. Buckets públicos: `avatars`, `workspace-logos`.
+- Convites: `Invitation.email` null = link aberto (reusável); com email = uso único. Actions em `@/lib/actions/invitation`. Página pública `/invite/[token]`.
+- Email: `sendInvitationEmail` de `@/lib/email` (Resend). **Modo teste só entrega ao email dono da conta Resend** — pra terceiros, verificar domínio e ajustar `EMAIL_FROM`. Nunca lança; sempre cheque `{ sent }`.
 
 ## Variáveis de ambiente
 

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Entrar · Kaizen",
 };
 
-export default function LoginPage() {
+export default function LoginPage({ searchParams }: { searchParams: { callbackUrl?: string } }) {
   return (
     <Card>
       <CardHeader>
@@ -15,7 +15,7 @@ export default function LoginPage() {
         <CardDescription>Acesse sua conta para continuar</CardDescription>
       </CardHeader>
       <CardContent>
-        <LoginForm />
+        <LoginForm redirectTo={searchParams.callbackUrl} />
       </CardContent>
     </Card>
   );

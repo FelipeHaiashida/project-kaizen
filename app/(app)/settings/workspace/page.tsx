@@ -10,6 +10,8 @@ import { UserAvatar } from "@/components/user-avatar";
 import { WorkspaceSettingsForm } from "@/components/workspace/workspace-settings-form";
 import { CopyInviteButton } from "@/components/workspace/copy-invite-button";
 import { RemoveMemberButton } from "@/components/workspace/remove-member-button";
+import { InviteMemberDialog } from "@/components/workspace/invite-member-dialog";
+import { RevokeInvitationButton } from "@/components/workspace/revoke-invitation-button";
 
 export const metadata: Metadata = {
   title: "Workspace · Kaizen",
@@ -32,6 +34,19 @@ export default async function WorkspaceSettingsPage() {
     },
     orderBy: [{ role: "asc" }, { joinedAt: "asc" }],
   });
+
+  const pendingInvitations = canManage
+    ? await db.invitation.findMany({
+        where: {
+          workspaceId: active.workspace.id,
+          email: { not: null },
+          acceptedAt: null,
+          expiresAt: { gt: new Date() },
+        },
+        select: { id: true, email: true, role: true },
+        orderBy: { expiresAt: "asc" },
+      })
+    : [];
 
   return (
     <div className="space-y-6">
@@ -59,7 +74,12 @@ export default async function WorkspaceSettingsPage() {
             <CardTitle className="text-xl">Membros</CardTitle>
             <CardDescription>{members.length} membro(s) neste workspace</CardDescription>
           </div>
-          {canManage && <CopyInviteButton />}
+          {canManage && (
+            <div className="flex gap-2">
+              <CopyInviteButton />
+              <InviteMemberDialog />
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           <ul className="divide-y">
@@ -84,6 +104,26 @@ export default async function WorkspaceSettingsPage() {
               );
             })}
           </ul>
+
+          {pendingInvitations.length > 0 && (
+            <div className="mt-6">
+              <h3 className="mb-2 text-sm font-medium text-muted-foreground">Convites pendentes</h3>
+              <ul className="divide-y">
+                {pendingInvitations.map((inv) => (
+                  <li key={inv.id} className="flex items-center gap-3 py-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm">{inv.email}</p>
+                      <p className="text-xs text-muted-foreground">Convite pendente</p>
+                    </div>
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">
+                      {ROLE_LABELS[inv.role]}
+                    </span>
+                    <RevokeInvitationButton invitationId={inv.id} email={inv.email!} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
