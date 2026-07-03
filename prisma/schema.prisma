@@ -76,6 +76,7 @@ model Project {
   color        String        @default("#7C3AED")
   icon         String        @default("📋")
   archived     Boolean       @default(false)
+  visibility   Visibility    @default(PUBLIC)
   workspaceId  String
   createdAt    DateTime      @default(now())
   workspace    Workspace     @relation(fields: [workspaceId], references: [id])
@@ -83,6 +84,11 @@ model Project {
   statuses     TaskStatus[]
   tags         Tag[]
   customFields CustomField[]
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
 }
 
 model List {

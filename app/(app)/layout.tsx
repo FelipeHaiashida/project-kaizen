@@ -5,9 +5,11 @@ import { LayoutDashboard } from "lucide-react";
 import { auth, signOut } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getActiveWorkspace } from "@/lib/workspace";
+import { getWorkspaceProjects } from "@/lib/project";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
 import { WorkspaceSwitcher } from "@/components/workspace/workspace-switcher";
+import { ProjectsNav } from "@/components/project/projects-nav";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -27,6 +29,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     logo: m.workspace.logo,
   }));
 
+  const projects = await getWorkspaceProjects(active.workspace.id);
+
   return (
     <div className="flex min-h-screen">
       <aside className="flex w-64 flex-col border-r bg-muted/20">
@@ -41,7 +45,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             role={active.role}
           />
         </div>
-        <nav className="flex-1 space-y-1 px-3">
+        <nav className="flex-1 space-y-4 overflow-y-auto px-3 pb-4">
           <Link
             href="/dashboard"
             className="flex items-center gap-2 rounded-md px-2 py-2 text-sm font-medium hover:bg-accent"
@@ -49,6 +53,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <LayoutDashboard className="h-4 w-4" />
             Dashboard
           </Link>
+          <ProjectsNav projects={projects} workspaceSlug={active.workspace.slug} />
         </nav>
       </aside>
 

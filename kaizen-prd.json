@@ -144,7 +144,7 @@
       "epic": "E3",
       "title": "CRUD de Projetos",
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "description": "Criar, editar, arquivar e excluir projetos dentro de um workspace.",
       "acceptanceCriteria": [
         "Sidebar lista todos os projetos do workspace com ícone e cor customizáveis",
