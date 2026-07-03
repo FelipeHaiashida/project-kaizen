@@ -208,3 +208,8 @@
 - Actions em lib/actions/epic.ts (create/update/delete/setTaskEpic). Gerenciado em EpicManager (settings do projeto, como TagManager) + criação inline "+ Novo" no TaskDetailSheet (select de épico). Épico salvo junto no save() da tarefa via setTaskEpic.
 - Display: badge do épico na ListViewRow (coluna "Épico") e no BoardCard. Filtro "Todo épico" na TaskListView e no BoardView. Tipo EpicRef + campo epic em TaskListItem; projectEpics propagado página->ProjectViews->views->sheet.
 - **Windows/Prisma:** o `npm run dev` trava o query_engine dll — `prisma generate` dá EPERM. Parar o dev (processo na porta 3000) antes de regenerar o client após mudança de schema.
+
+## Feature extra - Status customizáveis (a pedido do usuário)
+- TaskStatus já existia; adicionei gerenciamento (sem mudança de schema). Actions em lib/actions/status.ts (create/update/delete/reorder). deleteStatus REATRIBUI as tarefas ao 1º status restante (não apaga) e bloqueia excluir o último. reorderStatuses grava order por índice.
+- UI: StatusManager (settings do projeto, 1º card) com lista sortable (dnd-kit), StatusFormDialog (nome+cor) pra criar/editar, excluir. A ordem define as colunas do Board e o "concluído" = último status.
+- Verificado: criar "Bloqueado" (order 4), editar->"Bloqueada", excluir "A Fazer" (tarefa movida p/ Em Progresso, não apagada), status vira coluna no Board.

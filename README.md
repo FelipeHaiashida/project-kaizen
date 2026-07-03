@@ -47,12 +47,12 @@ Abre em [http://localhost:3000](http://localhost:3000).
 
 Veja [`.env.example`](./.env.example) para a lista completa. Resumo:
 
-| Variável | Onde | Descrição |
-|----------|------|-----------|
-| `DATABASE_URL`, `DIRECT_URL` | `.env` | Conexão PostgreSQL (pooler + direta) |
-| `NEXTAUTH_SECRET`, `NEXTAUTH_URL` | `.env.local` | NextAuth.js |
-| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | `.env.local` | Supabase (Realtime + Storage) |
-| `RESEND_API_KEY`, `EMAIL_FROM` | `.env.local` | Envio de emails de convite |
+| Variável                                                                                 | Onde         | Descrição                            |
+| ---------------------------------------------------------------------------------------- | ------------ | ------------------------------------ |
+| `DATABASE_URL`, `DIRECT_URL`                                                             | `.env`       | Conexão PostgreSQL (pooler + direta) |
+| `NEXTAUTH_SECRET`, `NEXTAUTH_URL`                                                        | `.env.local` | NextAuth.js                          |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | `.env.local` | Supabase (Realtime + Storage)        |
+| `RESEND_API_KEY`, `EMAIL_FROM`                                                           | `.env.local` | Envio de emails de convite           |
 
 ## 🧰 Scripts
 

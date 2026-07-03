@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { TagManager } from "@/components/project/tag-manager";
 import { CustomFieldManager } from "@/components/project/custom-field-manager";
 import { EpicManager } from "@/components/project/epic-manager";
+import { StatusManager } from "@/components/project/status-manager";
 
 export const metadata: Metadata = {
   title: "Configurações do projeto · Kaizen",
@@ -30,6 +31,7 @@ export default async function ProjectSettingsPage({
     select: {
       id: true,
       name: true,
+      statuses: { orderBy: { order: "asc" }, select: { id: true, name: true, color: true } },
       tags: { orderBy: { name: "asc" }, select: { id: true, name: true, color: true } },
       customFields: {
         orderBy: { order: "asc" },
@@ -52,6 +54,18 @@ export default async function ProjectSettingsPage({
         </Link>
         <h1 className="text-2xl font-bold tracking-tight">Configurações do projeto</h1>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Status</CardTitle>
+          <CardDescription>
+            Colunas do fluxo de trabalho. Arraste para reordenar, edite ou adicione os seus.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <StatusManager projectId={project.id} statuses={project.statuses} />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
