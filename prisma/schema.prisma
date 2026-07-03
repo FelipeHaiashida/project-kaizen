@@ -117,6 +117,7 @@ model Task {
   description   String?
   priority      Priority       @default(NORMAL)
   dueDate       DateTime?
+  estimateHours Int?
   parentId      String?
   order         Int            @default(0)
   listId        String
@@ -132,6 +133,7 @@ model Task {
   attachments   Attachment[]
   comments      Comment[]
   notifications Notification[]
+  fieldValues   CustomFieldValue[]
 }
 
 enum Priority {
@@ -169,12 +171,25 @@ model TaskTag {
 }
 
 model CustomField {
-  id        String          @id @default(cuid())
+  id        String             @id @default(cuid())
   name      String
   type      CustomFieldType
   options   String[]
+  order     Int                @default(0)
   projectId String
-  project   Project         @relation(fields: [projectId], references: [id])
+  project   Project            @relation(fields: [projectId], references: [id])
+  values    CustomFieldValue[]
+}
+
+model CustomFieldValue {
+  id      String      @id @default(cuid())
+  fieldId String
+  taskId  String
+  value   String
+  field   CustomField @relation(fields: [fieldId], references: [id])
+  task    Task        @relation(fields: [taskId], references: [id])
+
+  @@unique([fieldId, taskId])
 }
 
 enum CustomFieldType {

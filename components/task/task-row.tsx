@@ -6,7 +6,13 @@ import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/user-avatar";
 import { PriorityIcon } from "@/components/task/priority-icon";
 import { TaskDetailSheet } from "@/components/task/task-detail-sheet";
-import type { TaskListItem, StatusOption, MemberOption } from "@/components/task/types";
+import type {
+  TaskListItem,
+  StatusOption,
+  MemberOption,
+  TagRef,
+  ProjectField,
+} from "@/components/task/types";
 
 function formatDue(iso: string): string {
   const d = new Date(iso);
@@ -18,11 +24,15 @@ export function TaskRow({
   listId,
   statuses,
   members,
+  projectTags,
+  projectFields,
 }: {
   task: TaskListItem;
   listId: string;
   statuses: StatusOption[];
   members: MemberOption[];
+  projectTags: TagRef[];
+  projectFields: ProjectField[];
 }) {
   const [open, setOpen] = useState(false);
 
@@ -33,7 +43,22 @@ export function TaskRow({
         className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent"
       >
         <PriorityIcon priority={task.priority} />
-        <span className="min-w-0 flex-1 truncate">{task.title}</span>
+        <span className="min-w-0 max-w-[40%] truncate">{task.title}</span>
+
+        {task.tags.length > 0 && (
+          <div className="flex min-w-0 flex-1 flex-wrap gap-1">
+            {task.tags.map((t) => (
+              <span
+                key={t.id}
+                className="rounded-full px-1.5 text-[10px] font-medium text-white"
+                style={{ backgroundColor: t.color }}
+              >
+                {t.name}
+              </span>
+            ))}
+          </div>
+        )}
+        {task.tags.length === 0 && <span className="flex-1" />}
 
         {task.subtasks.length > 0 && (
           <span className="text-xs text-muted-foreground">☑ {task.subtasks.length}</span>
@@ -67,6 +92,8 @@ export function TaskRow({
           listId={listId}
           statuses={statuses}
           members={members}
+          projectTags={projectTags}
+          projectFields={projectFields}
           open={open}
           onOpenChange={setOpen}
         />

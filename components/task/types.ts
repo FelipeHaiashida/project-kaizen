@@ -4,6 +4,10 @@ export type TaskAssignee = { id: string; name: string; image: string | null };
 export type StatusOption = { id: string; name: string; color: string };
 export type MemberOption = { id: string; name: string; image: string | null };
 
+export type TagRef = { id: string; name: string; color: string };
+export type ProjectField = { id: string; name: string; type: string; options: string[] };
+export type TaskFieldValue = { fieldId: string; value: string };
+
 export type SubtaskItem = {
   id: string;
   title: string;
@@ -16,8 +20,11 @@ export type TaskListItem = {
   description: string | null;
   priority: Priority;
   dueDate: string | null; // ISO string
+  estimateHours: number | null;
   statusId: string;
   status: { name: string; color: string };
   assignees: TaskAssignee[];
+  tags: TagRef[];
+  fieldValues: TaskFieldValue[];
   subtasks: SubtaskItem[];
 };

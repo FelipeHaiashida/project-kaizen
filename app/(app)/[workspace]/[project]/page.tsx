@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Settings } from "lucide-react";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -32,6 +34,11 @@ export default async function ProjectPage({
       icon: true,
       workspaceId: true,
       statuses: { orderBy: { order: "asc" }, select: { id: true, name: true, color: true } },
+      tags: { orderBy: { name: "asc" }, select: { id: true, name: true, color: true } },
+      customFields: {
+        orderBy: { order: "asc" },
+        select: { id: true, name: true, type: true, options: true },
+      },
       lists: {
         orderBy: { order: "asc" },
         select: {
@@ -47,9 +54,12 @@ export default async function ProjectPage({
               description: true,
               priority: true,
               dueDate: true,
+              estimateHours: true,
               statusId: true,
               status: { select: { name: true, color: true } },
               assignees: { select: { user: { select: { id: true, name: true, image: true } } } },
+              tags: { select: { tag: { select: { id: true, name: true, color: true } } } },
+              fieldValues: { select: { fieldId: true, value: true } },
               subtasks: {
                 orderBy: { order: "asc" },
                 select: { id: true, title: true, statusId: true },
@@ -68,6 +78,8 @@ export default async function ProjectPage({
   });
   const members = memberRows.map((m) => m.user);
   const statuses = project.statuses;
+  const projectTags = project.tags;
+  const projectFields = project.customFields;
 
   const lists = project.lists.map((l) => ({ id: l.id, name: l.name, color: l.color }));
   const counts: Record<string, number> = {};
@@ -80,14 +92,24 @@ export default async function ProjectPage({
       description: t.description,
       priority: t.priority,
       dueDate: t.dueDate ? t.dueDate.toISOString() : null,
+      estimateHours: t.estimateHours,
       statusId: t.statusId,
       status: t.status,
       assignees: t.assignees.map((a) => a.user),
+      tags: t.tags.map((tt) => tt.tag),
+      fieldValues: t.fieldValues,
       subtasks: t.subtasks,
     }));
     counts[list.id] = tasks.length;
     bodies[list.id] = (
-      <TasksList listId={list.id} tasks={tasks} statuses={statuses} members={members} />
+      <TasksList
+        listId={list.id}
+        tasks={tasks}
+        statuses={statuses}
+        members={members}
+        projectTags={projectTags}
+        projectFields={projectFields}
+      />
     );
   }
 
@@ -100,12 +122,19 @@ export default async function ProjectPage({
         >
           {project.icon}
         </span>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold tracking-tight">{project.name}</h1>
           {project.description && (
             <p className="text-sm text-muted-foreground">{project.description}</p>
           )}
         </div>
+        <Link
+          href={`/${params.workspace}/${params.project}/settings`}
+          className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+        >
+          <Settings className="h-4 w-4" />
+          Configurações
+        </Link>
       </div>
 
       <ListsView projectId={project.id} initialLists={lists} counts={counts} bodies={bodies} />

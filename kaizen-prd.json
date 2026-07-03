@@ -194,7 +194,7 @@
       "epic": "E4",
       "title": "Tags e campos customizados",
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "description": "Tags coloridas e campos extras configuráveis por projeto.",
       "acceptanceCriteria": [
         "Tags: criar, colorir e aplicar múltiplas tags em tarefas",

@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import type { Priority } from "@prisma/client";
 
 import { updateTask, deleteTask, createTask, setTaskStatus } from "@/lib/actions/task";
+import { setTaskTags } from "@/lib/actions/tag";
+import { setTaskFieldValue, setTaskEstimate } from "@/lib/actions/custom-field";
 import { PRIORITIES } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -15,7 +17,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserAvatar } from "@/components/user-avatar";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
-import type { TaskListItem, StatusOption, MemberOption } from "@/components/task/types";
+import type {
+  TaskListItem,
+  StatusOption,
+  MemberOption,
+  TagRef,
+  ProjectField,
+} from "@/components/task/types";
 
 const selectClass =
   "flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -25,6 +33,8 @@ export function TaskDetailSheet({
   listId,
   statuses,
   members,
+  projectTags,
+  projectFields,
   open,
   onOpenChange,
 }: {
@@ -32,6 +42,8 @@ export function TaskDetailSheet({
   listId: string;
   statuses: StatusOption[];
   members: MemberOption[];
+  projectTags: TagRef[];
+  projectFields: ProjectField[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -44,6 +56,13 @@ export function TaskDetailSheet({
   const [priority, setPriority] = useState<Priority>(task.priority);
   const [dueDate, setDueDate] = useState(task.dueDate ? task.dueDate.slice(0, 10) : "");
   const [assigneeIds, setAssigneeIds] = useState<string[]>(task.assignees.map((a) => a.id));
+  const [tagIds, setTagIds] = useState<string[]>(task.tags.map((t) => t.id));
+  const [estimate, setEstimate] = useState(
+    task.estimateHours != null ? String(task.estimateHours) : ""
+  );
+  const [fieldValues, setFieldValues] = useState<Record<string, string>>(
+    Object.fromEntries(task.fieldValues.map((v) => [v.fieldId, v.value]))
+  );
   const [subtaskTitle, setSubtaskTitle] = useState("");
 
   const doneStatusId = statuses[statuses.length - 1]?.id;
@@ -51,6 +70,10 @@ export function TaskDetailSheet({
 
   function toggleAssignee(id: string) {
     setAssigneeIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
+
+  function toggleTag(id: string) {
+    setTagIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
 
   function save() {
@@ -63,11 +86,17 @@ export function TaskDetailSheet({
         dueDate: dueDate || null,
         assigneeIds,
       });
-      if (result.error) toast.error(result.error);
-      else {
-        toast.success("Tarefa salva");
-        router.refresh();
+      if (result.error) {
+        toast.error(result.error);
+        return;
       }
+      await setTaskTags(task.id, tagIds);
+      await setTaskEstimate(task.id, estimate.trim() === "" ? null : Number(estimate));
+      for (const field of projectFields) {
+        await setTaskFieldValue(task.id, field.id, fieldValues[field.id] ?? null);
+      }
+      toast.success("Tarefa salva");
+      router.refresh();
     });
   }
 
@@ -181,6 +210,80 @@ export function TaskDetailSheet({
             })}
           </div>
         </div>
+
+        {projectTags.length > 0 && (
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Tags</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {projectTags.map((t) => {
+                const on = tagIds.includes(t.id);
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => toggleTag(t.id)}
+                    className="rounded-full px-2 py-0.5 text-xs font-medium"
+                    style={
+                      on
+                        ? { backgroundColor: t.color, color: "#fff" }
+                        : { color: t.color, border: `1px solid ${t.color}` }
+                    }
+                  >
+                    {t.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">Estimativa (horas)</Label>
+          <Input
+            type="number"
+            min={0}
+            value={estimate}
+            onChange={(e) => setEstimate(e.target.value)}
+          />
+        </div>
+
+        {projectFields.map((f) => (
+          <div key={f.id} className="space-y-1">
+            <Label className="text-xs text-muted-foreground">{f.name}</Label>
+            {f.type === "CHECKBOX" ? (
+              <input
+                id={`field-${f.id}`}
+                type="checkbox"
+                checked={fieldValues[f.id] === "true"}
+                onChange={(e) =>
+                  setFieldValues((prev) => ({ ...prev, [f.id]: e.target.checked ? "true" : "" }))
+                }
+                className="h-4 w-4"
+              />
+            ) : f.type === "DROPDOWN" ? (
+              <select
+                id={`field-${f.id}`}
+                className={selectClass}
+                value={fieldValues[f.id] ?? ""}
+                onChange={(e) => setFieldValues((prev) => ({ ...prev, [f.id]: e.target.value }))}
+              >
+                <option value="">—</option>
+                {f.options.map((o) => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <Input
+                id={`field-${f.id}`}
+                type={f.type === "NUMBER" ? "number" : f.type === "DATE" ? "date" : "text"}
+                value={fieldValues[f.id] ?? ""}
+                onChange={(e) => setFieldValues((prev) => ({ ...prev, [f.id]: e.target.value }))}
+              />
+            )}
+          </div>
+        ))}
 
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Descrição</Label>
