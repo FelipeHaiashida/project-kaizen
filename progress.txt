@@ -50,6 +50,11 @@
   - `deleteProject` faz **cascata manual** numa `db.$transaction` (assignees→tags→attachments→reactions→comments→notifications→tasks→lists→statuses→tags→customFields→project). Não há `onDelete: Cascade` no schema; deletar em cadeia é responsabilidade da action.
   - Sidebar de projetos = client (`ProjectsNav` + `ProjectNavItem`): busca, seção Arquivados colapsável, menu de contexto (editar/arquivar/excluir). `ProjectFormDialog` (criar/editar) com seletor de cor/emoji e visibilidade. `visibility` (PUBLIC/PRIVATE) é armazenada e mostra 🔒; enforcement fino de acesso fica para depois.
   - `getWorkspaceProjects`/`getProjectForWorkspace` em `lib/project.ts`. Ícones/cores em `lib/validations/project.ts`.
+- **Listas:** actions em `lib/actions/list.ts` (create/update/delete/reorder), validação em `lib/validations/list.ts`. `deleteList` faz cascata manual das tarefas. `reorderLists(projectId, orderedIds)` grava `order` por índice via `updateMany` (where id+projectId).
+  - UI: `ListsView` (client, `@dnd-kit` — `DndContext`+`SortableContext` vertical) renderiza `SortableListSection` por lista (grip pra arrastar, header cor+nome+contagem, menu renomear/excluir). `ListFormDialog` cria/edita (nome+cor). Estado local sincronizado com props via `useEffect`.
+  - **`SortableListSection` aceita `children`** (área de tarefas) — a S08 injeta as tarefas por lista via prop `bodies` do `ListsView`. Sem children mostra "Nenhuma tarefa".
+- **dnd-kit instalado** (`@dnd-kit/core|sortable|utilities`). Reordenar via drag é implementado; **não dá pra simular o arraste no preview headless de forma confiável** — validar reorder manualmente ou por teste de action.
+- **NÃO rodar `npm run build` com o dev server (preview) rodando** — os artefatos de produção colidem com o cache dev e quebram o dev server ("Cannot find module './XXX.js'"). Se acontecer: parar o preview, `rm -rf .next`, reiniciar. Rodar o build só com o preview parado.
 - **Singleton do Prisma:** importar `{ db }` de `lib/db.ts` (NÃO instanciar `new PrismaClient()` avulso).
 - **Tipos globais:** importar de `@/types` (reexporta models/enums do Prisma).
 - **Convenções:** arquivos em kebab-case, componentes em PascalCase. Rotas autenticadas em `/(app)/`, públicas `/login` `/register` `/invite/[token]`. Mutations via Server Actions. Validação com Zod.

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { ListsView } from "@/components/list/lists-view";
 
 export const metadata: Metadata = {
   title: "Projeto · Kaizen",
@@ -21,9 +22,22 @@ export default async function ProjectPage({
       id: params.project,
       workspace: { slug: params.workspace, members: { some: { userId: session.user.id } } },
     },
-    select: { id: true, name: true, description: true, color: true, icon: true },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      color: true,
+      icon: true,
+      lists: {
+        orderBy: { order: "asc" },
+        select: { id: true, name: true, color: true, _count: { select: { tasks: true } } },
+      },
+    },
   });
   if (!project) notFound();
+
+  const lists = project.lists.map((l) => ({ id: l.id, name: l.name, color: l.color }));
+  const counts = Object.fromEntries(project.lists.map((l) => [l.id, l._count.tasks]));
 
   return (
     <div className="space-y-6">
@@ -42,9 +56,7 @@ export default async function ProjectPage({
         </div>
       </div>
 
-      <div className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
-        As tarefas deste projeto aparecerão aqui.
-      </div>
+      <ListsView projectId={project.id} initialLists={lists} counts={counts} />
     </div>
   );
 }

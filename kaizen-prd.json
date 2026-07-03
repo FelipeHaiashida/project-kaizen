@@ -160,7 +160,7 @@
       "epic": "E3",
       "title": "Listas dentro de Projetos",
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "description": "Cada projeto contém Listas (equivalente às listas do ClickUp) que agrupam tarefas.",
       "acceptanceCriteria": [
         "Projeto pode ter múltiplas Listas",
