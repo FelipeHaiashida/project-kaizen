@@ -353,6 +353,25 @@
         "Ações rápidas: 'Criar tarefa', 'Ir para projeto'",
         "Histórico de buscas recentes"
       ]
+    },
+    {
+      "id": "S19",
+      "epic": "E6",
+      "title": "Mural de Avisos",
+      "priority": 19,
+      "passes": false,
+      "description": "Aba de Avisos onde gestores (Owner/Admin) publicam comunicados em estilo mural para os colaboradores do workspace.",
+      "acceptanceCriteria": [
+        "Aba 'Avisos' acessível na navegação do workspace",
+        "Novo model Announcement no schema Prisma (workspaceId, authorId, title, content, pinned, level, createdAt, updatedAt) + AnnouncementRead para controle de leitura por usuário",
+        "Apenas Owner/Admin podem criar, editar e excluir avisos; Member apenas visualiza",
+        "Criação/edição via modal: título, conteúdo (rich text com TipTap), nível de destaque (Normal, Importante, Urgente com cor) e opção de fixar no topo",
+        "Avisos exibidos em formato de mural (cards), ordenados por: fixados primeiro, depois mais recentes",
+        "Cada card mostra autor (avatar + nome), data relativa, nível com cor e badge de fixado",
+        "Indicador de avisos não lidos (badge na aba) e marcação automática de 'lido' ao visualizar",
+        "Notificação in-app (NotificationType) para os membros quando um novo aviso é publicado",
+        "Estado vazio amigável quando não há avisos"
+      ]
     }
   ]
 }
