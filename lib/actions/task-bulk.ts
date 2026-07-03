@@ -50,6 +50,18 @@ export async function bulkMove(taskIds: string[], listId: string): Promise<BulkA
   return { success: "Tarefas movidas" };
 }
 
+/** Define a ordem das tarefas pela sequência de ids (índice = order). */
+export async function setTasksOrder(orderedIds: string[]): Promise<BulkActionState> {
+  const scoped = await scopeTasks(orderedIds);
+  if (!scoped) return { error: "Nenhum workspace ativo" };
+  const validIds = new Set(scoped.tasks.map((t) => t.id));
+  const ops = orderedIds
+    .filter((id) => validIds.has(id))
+    .map((id, index) => db.task.update({ where: { id }, data: { order: index } }));
+  if (ops.length > 0) await db.$transaction(ops);
+  return { success: "Ordem atualizada" };
+}
+
 export async function bulkDelete(taskIds: string[]): Promise<BulkActionState> {
   const scoped = await scopeTasks(taskIds);
   if (!scoped) return { error: "Nenhum workspace ativo" };

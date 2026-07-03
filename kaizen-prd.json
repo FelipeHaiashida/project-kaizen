@@ -243,7 +243,7 @@
       "epic": "E5",
       "title": "Visualização Kanban (Board)",
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "description": "Board estilo Kanban com colunas por status e drag-and-drop.",
       "acceptanceCriteria": [
         "Colunas representam os status do projeto",

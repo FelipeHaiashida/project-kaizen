@@ -5,7 +5,7 @@ import { Settings } from "lucide-react";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { TaskListView } from "@/components/task/task-list-view";
+import { ProjectViews } from "@/components/project/project-views";
 import type { TaskViewItem } from "@/components/task/types";
 
 export const metadata: Metadata = {
@@ -136,7 +136,7 @@ export default async function ProjectPage({
         </Link>
       </div>
 
-      <TaskListView
+      <ProjectViews
         projectId={project.id}
         lists={lists}
         tasks={tasks}

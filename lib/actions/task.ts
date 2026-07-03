@@ -45,6 +45,7 @@ export async function createTask(
   const task = await db.task.create({
     data: {
       title: parsed.data.title,
+      dueDate: parsed.data.dueDate ? new Date(parsed.data.dueDate) : null,
       listId,
       statusId: firstStatus.id,
       parentId: parentId ?? null,

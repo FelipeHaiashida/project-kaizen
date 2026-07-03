@@ -167,3 +167,8 @@
 - **Checks (cada story):** typecheck, lint, build, format todos verdes.
 - **Learnings:** ver Codebase Patterns (blocos S09/S10/S11).
 ---
+
+## Codebase notes S12+ (append)
+- **Views do projeto:** `components/project/project-views.tsx` (client) = abas Lista/Board/Calendário; a página do projeto renderiza `<ProjectViews>`. Cada view recebe os mesmos dados (tasks achatadas, lists, statuses, members, tags, fields).
+- **Board (S12):** `components/task/board-view.tsx` = kanban dnd-kit multi-container. Colunas = status. `useDroppable` na coluna, `useSortable` no card, `DndContext` com `onDragOver` (move entre colunas no estado local) + `onDragEnd` (persiste: `setTaskStatus` se mudou de coluna + `setTasksOrder`). Card com borda esquerda colorida por prioridade. Add por coluna = `createTask(1ª lista)` + `setTaskStatus`. `setTasksOrder` em lib/actions/task-bulk.ts. `createTask` agora aceita `dueDate` opcional (usado na S13). Gesto de arraste não é simulável headless — validar por build + caminho de status.
+- **Login no preview:** `preview_click` no submit às vezes não dispara o `handleSubmit` do react-hook-form; usar `document.querySelector('form').requestSubmit()`. E aguardar o redirect ANTES de navegar (senão a navegação corre com o login e cai em /login).

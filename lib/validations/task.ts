@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const createTaskSchema = z.object({
   title: z.string().min(1, "Informe um título").max(200, "Título muito longo"),
+  dueDate: z.string().nullable().optional(), // "YYYY-MM-DD" opcional
 });
 
 export const updateTaskSchema = z.object({
