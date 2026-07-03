@@ -13,6 +13,12 @@
   - `.env` (gitignored) → `DATABASE_URL` e `DIRECT_URL`. **O Prisma CLI só lê `.env`, não `.env.local`.**
   - `.env.local` (gitignored) → segredos de app (NextAuth, Supabase, Resend). Lido pelo Next.js.
   - `.env.example` (versionado) → documenta todas as variáveis.
+- **Banco JÁ está no ar (Supabase).** Projeto `kaizen` ref `kyrvyqtjlrxgzbrhxjiz` (ca-central-1),
+  16 tabelas criadas. `DATABASE_URL` = pooler transaction (6543, `?pgbouncer=true`), `DIRECT_URL` = pooler session (5432).
+  - **Usar `npx prisma db push` para sincronizar o schema** (NÃO `migrate dev` — o shadow database falha no pooler do Supabase). Sem histórico de migrations por enquanto; ok para esta fase.
+  - Testar conexão avulsa: `node --env-file=.env -e "..."` (não há `dotenv` instalado; o Node 24 tem `--env-file`).
+  - Falta `SUPABASE_SERVICE_ROLE_KEY` no `.env.local` (necessária só a partir da S03/Storage).
+- **Integração MCP do Supabase aponta para OUTRA conta** (anabeatrizleite235), não a do projeto atual. Portanto NÃO dá para usar as tools MCP (list_tables, advisors, logs, apply_migration) contra este banco — usar Prisma diretamente.
 - **Singleton do Prisma:** importar `{ db }` de `lib/db.ts` (NÃO instanciar `new PrismaClient()` avulso).
 - **Tipos globais:** importar de `@/types` (reexporta models/enums do Prisma).
 - **Convenções:** arquivos em kebab-case, componentes em PascalCase. Rotas autenticadas em `/(app)/`, públicas `/login` `/register` `/invite/[token]`. Mutations via Server Actions. Validação com Zod.
