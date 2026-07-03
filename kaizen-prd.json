@@ -359,7 +359,7 @@
       "epic": "E6",
       "title": "Mural de Avisos",
       "priority": 19,
-      "passes": false,
+      "passes": true,
       "description": "Aba de Avisos onde gestores (Owner/Admin) publicam comunicados em estilo mural para os colaboradores do workspace.",
       "acceptanceCriteria": [
         "Aba 'Avisos' acessível na navegação do workspace",

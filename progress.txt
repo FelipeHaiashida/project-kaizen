@@ -196,3 +196,9 @@
 
 ## S18 Busca global
 - cmdk instalado. `components/search/global-search.tsx`: command palette (Ctrl/Cmd+K global listener), busca em tempo real (debounce 200ms) via `lib/actions/search.ts` (tarefas/projetos/membros no workspace ativo, shouldFilter=false pois filtro é server-side). Grupos, ações rápidas (dashboard/criar tarefa/ir para projeto), buscas recentes em localStorage. Botão de busca no header. Navegação por setas/Enter é nativa do cmdk (não simulável por evento sintético).
+
+## S19 Mural de Avisos
+- Schema: Announcement (title, content, level AnnouncementLevel, pinned, workspaceId, authorId) + AnnouncementRead (@@unique announcementId+userId). Notification += link String?, NotificationType += ANNOUNCEMENT (notify agora trata tipos sem setting via SETTING_FIELD parcial).
+- Actions em lib/actions/announcement.ts: get (com read status), getUnreadCount, markAnnouncementsRead, create/update/delete (só Owner/Admin), notifica todos os membros ao publicar (link /avisos).
+- UI: /avisos (AnnouncementBoard client): cards com borda por nível, badge Fixado, autor+tempo relativo, nível colorido; ordenado pinned desc + createdAt desc; AnnouncementFormDialog (título, conteúdo TipTap, nível, fixar). Member vê read-only (sem criar/editar/excluir). Marca lido ao visualizar (useEffect). Link "Avisos" na sidebar com badge de não lidos (server). Estado vazio.
+- Verificado: owner cria (URGENT+fixado) → card renderiza + Bruno recebe notif ANNOUNCEMENT; membro vê read-only (sem botões) e badge some ao visualizar.

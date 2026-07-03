@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, Megaphone } from "lucide-react";
 
 import { auth, signOut } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getActiveWorkspace } from "@/lib/workspace";
 import { getWorkspaceProjects } from "@/lib/project";
+import { getUnreadAnnouncementCount } from "@/lib/actions/announcement";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
 import { WorkspaceSwitcher } from "@/components/workspace/workspace-switcher";
@@ -32,6 +33,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }));
 
   const projects = await getWorkspaceProjects(active.workspace.id);
+  const unreadAnnouncements = await getUnreadAnnouncementCount();
 
   return (
     <div className="flex min-h-screen">
@@ -54,6 +56,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           >
             <LayoutDashboard className="h-4 w-4" />
             Dashboard
+          </Link>
+          <Link
+            href="/avisos"
+            className="flex items-center gap-2 rounded-md px-2 py-2 text-sm font-medium hover:bg-accent"
+          >
+            <Megaphone className="h-4 w-4" />
+            Avisos
+            {unreadAnnouncements > 0 && (
+              <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
+                {unreadAnnouncements > 9 ? "9+" : unreadAnnouncements}
+              </span>
+            )}
           </Link>
           <ProjectsNav projects={projects} workspaceSlug={active.workspace.slug} />
         </nav>

@@ -26,6 +26,7 @@ model User {
   notifications   Notification[]
   invitationsSent Invitation[]      @relation("InvitedBy")
   notificationSettings NotificationSettings?
+  announcements   Announcement[]
 }
 
 model NotificationSettings {
@@ -46,6 +47,7 @@ model Workspace {
   members     WorkspaceMember[]
   projects    Project[]
   invitations Invitation[]
+  announcements Announcement[]
 }
 
 model WorkspaceMember {
@@ -246,6 +248,7 @@ model Notification {
   read      Boolean          @default(false)
   userId    String
   taskId    String?
+  link      String?
   message   String
   createdAt DateTime         @default(now())
   user      User             @relation(fields: [userId], references: [id])
@@ -257,4 +260,35 @@ enum NotificationType {
   MENTIONED
   DUE_SOON
   STATUS_CHANGED
+  ANNOUNCEMENT
+}
+
+model Announcement {
+  id          String             @id @default(cuid())
+  title       String
+  content     String
+  pinned      Boolean            @default(false)
+  level       AnnouncementLevel  @default(NORMAL)
+  workspaceId String
+  authorId    String
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  workspace   Workspace          @relation(fields: [workspaceId], references: [id])
+  author      User               @relation(fields: [authorId], references: [id])
+  reads       AnnouncementRead[]
+}
+
+enum AnnouncementLevel {
+  NORMAL
+  IMPORTANT
+  URGENT
+}
+
+model AnnouncementRead {
+  id             String       @id @default(cuid())
+  announcementId String
+  userId         String
+  announcement   Announcement @relation(fields: [announcementId], references: [id])
+
+  @@unique([announcementId, userId])
 }

@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import type { NotificationType } from "@prisma/client";
 
-const SETTING_FIELD: Record<NotificationType, keyof SettingsRow> = {
+const SETTING_FIELD: Partial<Record<NotificationType, keyof SettingsRow>> = {
   TASK_ASSIGNED: "taskAssigned",
   MENTIONED: "mentioned",
   DUE_SOON: "dueSoon",
@@ -24,16 +24,20 @@ export async function notify(params: {
   type: NotificationType;
   message: string;
   taskId?: string | null;
+  link?: string | null;
   actorId?: string;
 }) {
-  const { userId, type, message, taskId, actorId } = params;
+  const { userId, type, message, taskId, link, actorId } = params;
   if (actorId && actorId === userId) return;
 
-  const settings = await db.notificationSettings.findUnique({ where: { userId } });
-  if (settings && settings[SETTING_FIELD[type]] === false) return;
+  const field = SETTING_FIELD[type];
+  if (field) {
+    const settings = await db.notificationSettings.findUnique({ where: { userId } });
+    if (settings && settings[field] === false) return;
+  }
 
   await db.notification.create({
-    data: { userId, type, message, taskId: taskId ?? null },
+    data: { userId, type, message, taskId: taskId ?? null, link: link ?? null },
   });
 }
 

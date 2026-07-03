@@ -36,6 +36,7 @@ export async function getNotifications(): Promise<{
       message: true,
       read: true,
       taskId: true,
+      link: true,
       createdAt: true,
       task: {
         select: {
@@ -54,7 +55,7 @@ export async function getNotifications(): Promise<{
     read: n.read,
     taskId: n.taskId,
     createdAt: n.createdAt.toISOString(),
-    taskPath: n.task ? `/${n.task.list.project.workspace.slug}/${n.task.list.project.id}` : null,
+    taskPath: n.task ? `/${n.task.list.project.workspace.slug}/${n.task.list.project.id}` : n.link,
   }));
 
   const unread = notifications.filter((n) => !n.read).length;
