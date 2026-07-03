@@ -193,3 +193,6 @@
 
 ## S16 Dashboard
 - app/(app)/dashboard/page.tsx (server): resumo (concluídas 7d, em progresso, atrasadas), Vencendo hoje/Atrasadas em destaque, Minhas tarefas (ordenadas por vencimento), Atividade recente (últimos comentários do workspace), Projetos recentes. "Concluído" = status de maior order em cada projeto (doneStatusIds computado por projeto). Sem model de Activity — atividade derivada de comentários recentes.
+
+## S18 Busca global
+- cmdk instalado. `components/search/global-search.tsx`: command palette (Ctrl/Cmd+K global listener), busca em tempo real (debounce 200ms) via `lib/actions/search.ts` (tarefas/projetos/membros no workspace ativo, shouldFilter=false pois filtro é server-side). Grupos, ações rápidas (dashboard/criar tarefa/ir para projeto), buscas recentes em localStorage. Botão de busca no header. Navegação por setas/Enter é nativa do cmdk (não simulável por evento sintético).

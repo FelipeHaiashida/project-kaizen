@@ -11,6 +11,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { WorkspaceSwitcher } from "@/components/workspace/workspace-switcher";
 import { ProjectsNav } from "@/components/project/projects-nav";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { GlobalSearch } from "@/components/search/global-search";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -59,7 +60,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </aside>
 
       <div className="flex flex-1 flex-col">
-        <header className="flex items-center justify-end gap-3 border-b px-6 py-3">
+        <header className="flex items-center gap-3 border-b px-6 py-3">
+          <GlobalSearch
+            workspaceSlug={active.workspace.slug}
+            projects={projects
+              .filter((p) => !p.archived)
+              .map((p) => ({ id: p.id, name: p.name, icon: p.icon }))}
+          />
+          <div className="flex-1" />
           <NotificationBell userId={session.user.id} />
           <Link
             href="/settings/profile"

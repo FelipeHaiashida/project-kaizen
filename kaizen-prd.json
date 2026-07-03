@@ -342,7 +342,7 @@
       "epic": "E7",
       "title": "Busca global",
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "description": "Barra de busca global que encontra tarefas, projetos e membros.",
       "acceptanceCriteria": [
         "Atalho Cmd/Ctrl+K abre modal de busca (Command Palette)",
