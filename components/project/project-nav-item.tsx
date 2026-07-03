@@ -69,28 +69,29 @@ export function ProjectNavItem({
   return (
     <div
       className={cn(
-        "group flex items-center gap-1 rounded-md pr-1 hover:bg-accent",
-        isActive && "bg-accent"
+        "group flex items-center gap-1 rounded-[9px] pr-1 text-sidebar-foreground hover:bg-sidebar-accent",
+        isActive && "bg-sidebar-accent font-semibold"
       )}
     >
-      <Link href={href} className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-sm">
+      <Link
+        href={href}
+        className="flex min-w-0 flex-1 items-center gap-2 px-2.5 py-1.5 text-[13px]"
+      >
         <span
           className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs"
-          style={{ backgroundColor: `${project.color}20` }}
+          style={{ backgroundColor: `${project.color}33` }}
         >
           {project.icon}
         </span>
         <span className="truncate">{project.name}</span>
-        {project.visibility === "PRIVATE" && (
-          <span className="text-xs text-muted-foreground">🔒</span>
-        )}
+        {project.visibility === "PRIVATE" && <span className="text-xs text-sidebar-muted">🔒</span>}
       </Link>
 
       <DropdownMenu>
         <DropdownMenuTrigger
           disabled={isPending}
           aria-label={`Ações de ${project.name}`}
-          className="rounded p-1 text-muted-foreground opacity-0 hover:bg-background focus:opacity-100 focus:outline-none group-hover:opacity-100"
+          className="rounded p-1 text-sidebar-muted opacity-0 hover:bg-sidebar-active/40 hover:text-sidebar-foreground focus:opacity-100 focus:outline-none group-hover:opacity-100"
         >
           <MoreHorizontal className="h-4 w-4" />
         </DropdownMenuTrigger>

@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
 
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-8 p-8 text-center">
-      <div className="space-y-3">
-        <p className="text-sm font-medium text-primary">改善 · Kaizen</p>
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+      <div className="flex flex-col items-center gap-4">
+        <Logo markSize={44} textSize={28} />
+        <h1 className="font-brand text-4xl font-bold tracking-tight sm:text-5xl">
           Gerencie projetos e tarefas da sua equipe
         </h1>
         <p className="mx-auto max-w-xl text-muted-foreground">

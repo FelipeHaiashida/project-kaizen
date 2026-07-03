@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 
 export default function LoginPage({ searchParams }: { searchParams: { callbackUrl?: string } }) {
   return (
-    <Card>
+    <Card className="rounded-[18px] border-border/80 px-2 py-1 shadow-[0_8px_24px_rgba(61,77,52,0.06)]">
       <CardHeader>
-        <CardTitle>Entrar</CardTitle>
+        <CardTitle className="font-brand text-xl">Entrar</CardTitle>
         <CardDescription>Acesse sua conta para continuar</CardDescription>
       </CardHeader>
       <CardContent>

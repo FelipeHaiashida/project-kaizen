@@ -40,11 +40,15 @@ export function WorkspaceSwitcher({ active, workspaces, role }: WorkspaceSwitche
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={isPending}
-        className="flex w-full items-center gap-2 rounded-md border px-2 py-2 text-left text-sm hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+        className="flex w-full items-center gap-2 rounded-[10px] bg-sidebar-accent px-2.5 py-2 text-left text-[12.5px] text-sidebar-foreground transition-colors hover:bg-sidebar-accent/80 focus:outline-none focus:ring-2 focus:ring-sidebar-active disabled:opacity-50"
       >
-        <UserAvatar name={active.name} image={active.logo} className="h-6 w-6 rounded text-xs" />
+        <UserAvatar
+          name={active.name}
+          image={active.logo}
+          className="h-[18px] w-[18px] rounded-[5px] text-[10px]"
+        />
         <span className="flex-1 truncate font-medium">{active.name}</span>
-        <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+        <ChevronsUpDown className="h-4 w-4 text-sidebar-muted" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[15rem]">
         <DropdownMenuLabel className="text-xs text-muted-foreground">Workspaces</DropdownMenuLabel>

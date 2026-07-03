@@ -18,6 +18,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        brand: ["var(--font-brand)", "var(--font-sans)", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -25,6 +26,19 @@ const config: Config = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          muted: "hsl(var(--sidebar-muted))",
+          accent: "hsl(var(--sidebar-accent))",
+          active: "hsl(var(--sidebar-active))",
+          "active-foreground": "hsl(var(--sidebar-active-foreground))",
+        },
+        info: "hsl(var(--info))",
+        amber: {
+          DEFAULT: "hsl(var(--amber))",
+          foreground: "hsl(var(--amber-foreground))",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",

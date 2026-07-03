@@ -42,7 +42,7 @@ export function ProjectViews(props: ProjectViewsProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-1 border-b">
+      <div className="inline-flex gap-1 rounded-full bg-secondary p-1">
         {TABS.map((t) => {
           const Icon = t.icon;
           return (
@@ -50,10 +50,10 @@ export function ProjectViews(props: ProjectViewsProps) {
               key={t.key}
               onClick={() => setView(t.key)}
               className={cn(
-                "flex items-center gap-1.5 border-b-2 px-3 py-1.5 text-sm",
+                "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm transition-colors",
                 view === t.key
-                  ? "border-primary font-medium text-foreground"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                  ? "bg-card font-semibold text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Icon className="h-4 w-4" />

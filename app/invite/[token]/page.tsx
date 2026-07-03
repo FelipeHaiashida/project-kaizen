@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
 import { AcceptInvitationButton } from "@/components/workspace/accept-invitation-button";
+import { Logo } from "@/components/logo";
 
 export const metadata: Metadata = {
   title: "Convite · Kaizen",
@@ -14,10 +15,9 @@ export const metadata: Metadata = {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-muted/40 p-4">
-      <div className="mb-6 text-center">
-        <span className="text-2xl font-bold tracking-tight">Kaizen</span>
-        <span className="ml-2 text-sm text-primary">改善</span>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+      <div className="mb-6">
+        <Logo markSize={34} textSize={22} />
       </div>
       <div className="w-full max-w-sm">{children}</div>
     </div>

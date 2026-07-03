@@ -2,50 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Direção Matcha — paleta quente verde-oliva/matcha sobre fundo creme.
+ * Todos os tokens shadcn abaixo derivam dos design tokens do handoff.
+ */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 262 83% 58%;
+    --background: 46 21% 88%; /* #E8E5DB página */
+    --foreground: 42 17% 12%; /* #232019 texto principal */
+    --card: 48 43% 98%; /* #FCFBF7 superfície clara */
+    --card-foreground: 42 17% 12%;
+    --popover: 48 43% 98%;
+    --popover-foreground: 42 17% 12%;
+    --primary: 105 20% 40%; /* #5C7A52 verde matcha */
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 262 83% 58%;
-    --radius: 0.5rem;
+    --secondary: 47 33% 92%; /* #F1EEE3 trilho / tabs */
+    --secondary-foreground: 42 17% 12%;
+    --muted: 45 25% 95%; /* #F6F4EE superfície suave */
+    --muted-foreground: 45 11% 51%; /* #8f8873 texto suave */
+    --accent: 97 24% 90%; /* #E3EBDE chip verde claro */
+    --accent-foreground: 98 19% 25%; /* #3D4D34 verde escuro */
+    --destructive: 9 60% 45%; /* #B8432E vermelho / atrasado */
+    --destructive-foreground: 0 0% 100%;
+    --border: 46 28% 85%; /* #E4DFCF borda clara */
+    --input: 42 23% 83%; /* #DDD7C9 borda de input */
+    --ring: 105 20% 40%;
+    --radius: 0.75rem;
+
+    /* Sidebar (verde escuro) */
+    --sidebar: 98 19% 25%; /* #3D4D34 */
+    --sidebar-foreground: 97 21% 84%; /* #D8DFCF */
+    --sidebar-muted: 97 18% 78%; /* #C7D1BB */
+    --sidebar-accent: 97 19% 31%; /* #4B5D40 hover */
+    --sidebar-active: 105 20% 40%; /* #5C7A52 ativo */
+    --sidebar-active-foreground: 0 0% 100%;
+
+    /* Acentos de chips/status */
+    --chip-mint: 100 29% 69%; /* #A9C79A avatar */
+    --amber: 41 96% 40%; /* #CA8A04 */
+    --amber-foreground: 24 60% 40%; /* #a05a2c */
+    --info: 215 36% 46%; /* #4B6FA0 azul */
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 262 83% 68%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 262 83% 68%;
+    --background: 40 8% 10%;
+    --foreground: 46 20% 92%;
+    --card: 40 8% 13%;
+    --card-foreground: 46 20% 92%;
+    --popover: 40 8% 13%;
+    --popover-foreground: 46 20% 92%;
+    --primary: 105 24% 55%;
+    --primary-foreground: 40 10% 8%;
+    --secondary: 40 6% 18%;
+    --secondary-foreground: 46 20% 92%;
+    --muted: 40 6% 18%;
+    --muted-foreground: 45 10% 62%;
+    --accent: 98 14% 24%;
+    --accent-foreground: 97 21% 84%;
+    --destructive: 9 55% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 40 6% 22%;
+    --input: 40 6% 22%;
+    --ring: 105 24% 55%;
+
+    --sidebar: 98 18% 16%;
+    --sidebar-foreground: 97 18% 80%;
+    --sidebar-muted: 97 14% 70%;
+    --sidebar-accent: 98 16% 24%;
+    --sidebar-active: 105 24% 45%;
+    --sidebar-active-foreground: 0 0% 100%;
   }
 }
 
@@ -56,4 +81,18 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Wordmark / títulos usam Zen Maru Gothic */
+  .font-brand {
+    font-family: var(--font-brand), "Zen Maru Gothic", sans-serif;
+  }
+}
+
+/* Barra de rolagem quente (combina com o handoff) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d3ccb8;
+  border-radius: 8px;
 }

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, Megaphone } from "lucide-react";
 
 import { auth, signOut } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -8,7 +7,9 @@ import { getActiveWorkspace } from "@/lib/workspace";
 import { getWorkspaceProjects } from "@/lib/project";
 import { getUnreadAnnouncementCount } from "@/lib/actions/announcement";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
 import { UserAvatar } from "@/components/user-avatar";
+import { AppSidebarNav } from "@/components/app-sidebar-nav";
 import { WorkspaceSwitcher } from "@/components/workspace/workspace-switcher";
 import { ProjectsNav } from "@/components/project/projects-nav";
 import { NotificationBell } from "@/components/notifications/notification-bell";
@@ -37,44 +38,40 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen">
-      <aside className="flex w-64 flex-col border-r bg-muted/20">
-        <div className="p-3">
-          <WorkspaceSwitcher
-            active={{
-              slug: active.workspace.slug,
-              name: active.workspace.name,
-              logo: active.workspace.logo,
-            }}
-            workspaces={workspaces}
-            role={active.role}
-          />
+      <aside className="flex w-[248px] flex-col gap-3 bg-sidebar px-3 py-4 text-sidebar-foreground">
+        <div className="px-1.5 pb-1">
+          <Logo variant="light" markSize={30} textSize={17} />
         </div>
-        <nav className="flex-1 space-y-4 overflow-y-auto px-3 pb-4">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 rounded-md px-2 py-2 text-sm font-medium hover:bg-accent"
-          >
-            <LayoutDashboard className="h-4 w-4" />
-            Dashboard
-          </Link>
-          <Link
-            href="/avisos"
-            className="flex items-center gap-2 rounded-md px-2 py-2 text-sm font-medium hover:bg-accent"
-          >
-            <Megaphone className="h-4 w-4" />
-            Avisos
-            {unreadAnnouncements > 0 && (
-              <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
-                {unreadAnnouncements > 9 ? "9+" : unreadAnnouncements}
-              </span>
-            )}
-          </Link>
+        <WorkspaceSwitcher
+          active={{
+            slug: active.workspace.slug,
+            name: active.workspace.name,
+            logo: active.workspace.logo,
+          }}
+          workspaces={workspaces}
+          role={active.role}
+        />
+        <AppSidebarNav unreadAnnouncements={unreadAnnouncements} />
+        <div className="flex-1 overflow-y-auto">
           <ProjectsNav projects={projects} workspaceSlug={active.workspace.slug} />
-        </nav>
+        </div>
+        <Link
+          href="/settings/profile"
+          className="flex items-center gap-2.5 rounded-[9px] px-2.5 py-2 transition-colors hover:bg-sidebar-accent"
+        >
+          <UserAvatar
+            name={user?.name}
+            image={user?.image}
+            className="h-[26px] w-[26px] text-[11px] [&_span]:bg-[hsl(var(--chip-mint))] [&_span]:text-sidebar"
+          />
+          <span className="truncate text-[12.5px] font-medium">
+            {user?.name ?? session.user.name}
+          </span>
+        </Link>
       </aside>
 
       <div className="flex flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b px-6 py-3">
+        <header className="flex items-center gap-3 border-b bg-card/60 px-6 py-3">
           <GlobalSearch
             workspaceSlug={active.workspace.slug}
             projects={projects
