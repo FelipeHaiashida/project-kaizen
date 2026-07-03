@@ -1,0 +1,229 @@
+// Prisma schema for Kaizen — plataforma de gerenciamento de projetos e tarefas
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id              String            @id @default(cuid())
+  name            String
+  email           String            @unique
+  password        String?
+  image           String?
+  bio             String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  memberships     WorkspaceMember[]
+  assignedTasks   TaskAssignee[]
+  comments        Comment[]
+  notifications   Notification[]
+  invitationsSent Invitation[]      @relation("InvitedBy")
+}
+
+model Workspace {
+  id          String            @id @default(cuid())
+  name        String
+  slug        String            @unique
+  logo        String?
+  createdAt   DateTime          @default(now())
+  members     WorkspaceMember[]
+  projects    Project[]
+  invitations Invitation[]
+}
+
+model WorkspaceMember {
+  id          String    @id @default(cuid())
+  role        Role      @default(MEMBER)
+  userId      String
+  workspaceId String
+  joinedAt    DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@unique([userId, workspaceId])
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model Invitation {
+  id          String    @id @default(cuid())
+  email       String
+  token       String    @unique @default(cuid())
+  role        Role      @default(MEMBER)
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  workspaceId String
+  invitedById String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  invitedBy   User      @relation("InvitedBy", fields: [invitedById], references: [id])
+}
+
+model Project {
+  id           String        @id @default(cuid())
+  name         String
+  description  String?
+  color        String        @default("#7C3AED")
+  icon         String        @default("📋")
+  archived     Boolean       @default(false)
+  workspaceId  String
+  createdAt    DateTime      @default(now())
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id])
+  lists        List[]
+  statuses     TaskStatus[]
+  tags         Tag[]
+  customFields CustomField[]
+}
+
+model List {
+  id        String  @id @default(cuid())
+  name      String
+  color     String  @default("#6B7280")
+  order     Int     @default(0)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+  tasks     Task[]
+}
+
+model TaskStatus {
+  id        String  @id @default(cuid())
+  name      String
+  color     String
+  order     Int     @default(0)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+  tasks     Task[]
+}
+
+model Task {
+  id            String         @id @default(cuid())
+  title         String
+  description   String?
+  priority      Priority       @default(NORMAL)
+  dueDate       DateTime?
+  parentId      String?
+  order         Int            @default(0)
+  listId        String
+  statusId      String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  list          List           @relation(fields: [listId], references: [id])
+  status        TaskStatus     @relation(fields: [statusId], references: [id])
+  parent        Task?          @relation("Subtasks", fields: [parentId], references: [id])
+  subtasks      Task[]         @relation("Subtasks")
+  assignees     TaskAssignee[]
+  tags          TaskTag[]
+  attachments   Attachment[]
+  comments      Comment[]
+  notifications Notification[]
+}
+
+enum Priority {
+  URGENT
+  HIGH
+  NORMAL
+  LOW
+}
+
+model TaskAssignee {
+  taskId String
+  userId String
+  task   Task   @relation(fields: [taskId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@id([taskId, userId])
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  name      String
+  color     String
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id])
+  tasks     TaskTag[]
+}
+
+model TaskTag {
+  taskId String
+  tagId  String
+  task   Task   @relation(fields: [taskId], references: [id])
+  tag    Tag    @relation(fields: [tagId], references: [id])
+
+  @@id([taskId, tagId])
+}
+
+model CustomField {
+  id        String          @id @default(cuid())
+  name      String
+  type      CustomFieldType
+  options   String[]
+  projectId String
+  project   Project         @relation(fields: [projectId], references: [id])
+}
+
+enum CustomFieldType {
+  TEXT
+  NUMBER
+  DATE
+  DROPDOWN
+  CHECKBOX
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  name      String
+  url       String
+  size      Int
+  taskId    String
+  createdAt DateTime @default(now())
+  task      Task     @relation(fields: [taskId], references: [id])
+}
+
+model Comment {
+  id        String            @id @default(cuid())
+  content   String
+  taskId    String
+  userId    String
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  task      Task              @relation(fields: [taskId], references: [id])
+  user      User              @relation(fields: [userId], references: [id])
+  reactions CommentReaction[]
+}
+
+model CommentReaction {
+  id        String  @id @default(cuid())
+  emoji     String
+  commentId String
+  userId    String
+  comment   Comment @relation(fields: [commentId], references: [id])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  read      Boolean          @default(false)
+  userId    String
+  taskId    String?
+  message   String
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id])
+  task      Task?            @relation(fields: [taskId], references: [id])
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  MENTIONED
+  DUE_SOON
+  STATUS_CHANGED
+}

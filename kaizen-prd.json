@@ -1,0 +1,358 @@
+{
+  "project": {
+    "name": "Kaizen",
+    "description": "Plataforma de gerenciamento de projetos e tarefas estilo ClickUp para equipes internas",
+    "techStack": {
+      "frontend": "Next.js 14 (App Router) + TypeScript + Tailwind CSS + shadcn/ui",
+      "backend": "Next.js API Routes + Prisma ORM",
+      "database": "PostgreSQL (via Supabase)",
+      "auth": "NextAuth.js v5 (credentials + Google OAuth)",
+      "realtime": "Supabase Realtime",
+      "storage": "Supabase Storage (anexos de tarefas)",
+      "deploy": "Vercel"
+    },
+    "branchName": "main",
+    "designSystem": {
+      "primaryColor": "#7C3AED",
+      "fontFamily": "Inter",
+      "borderRadius": "rounded-lg",
+      "theme": "light/dark toggle"
+    }
+  },
+  "epics": [
+    {
+      "id": "E1",
+      "name": "Autenticação e Usuários",
+      "description": "Sistema de autenticação e gerenciamento de perfis"
+    },
+    {
+      "id": "E2",
+      "name": "Workspaces e Equipes",
+      "description": "Espaços de trabalho compartilhados entre membros"
+    },
+    {
+      "id": "E3",
+      "name": "Projetos",
+      "description": "Criação e organização de projetos dentro dos workspaces"
+    },
+    {
+      "id": "E4",
+      "name": "Tarefas",
+      "description": "CRUD completo de tarefas com todos os atributos"
+    },
+    {
+      "id": "E5",
+      "name": "Visualizações",
+      "description": "Board Kanban, Lista e Calendário"
+    },
+    {
+      "id": "E6",
+      "name": "Colaboração",
+      "description": "Comentários, menções e notificações"
+    },
+    {
+      "id": "E7",
+      "name": "Dashboard e Relatórios",
+      "description": "Visão geral e métricas da equipe"
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "epic": "E1",
+      "title": "Setup inicial do projeto",
+      "priority": 1,
+      "passes": true,
+      "description": "Configurar o projeto Next.js com todas as dependências, estrutura de pastas e banco de dados.",
+      "acceptanceCriteria": [
+        "Next.js 14 inicializado com TypeScript e App Router",
+        "Tailwind CSS + shadcn/ui configurados",
+        "Prisma configurado com schema inicial (User, Workspace, Project, Task)",
+        "Variáveis de ambiente documentadas em .env.example",
+        "ESLint + Prettier configurados",
+        "Estrutura de pastas: /app, /components, /lib, /prisma, /types"
+      ]
+    },
+    {
+      "id": "S02",
+      "epic": "E1",
+      "title": "Autenticação com email e senha",
+      "priority": 2,
+      "passes": false,
+      "description": "Implementar login e registro com email/senha usando NextAuth.js v5.",
+      "acceptanceCriteria": [
+        "Página /login com formulário de email e senha",
+        "Página /register com nome, email e senha",
+        "Validação de campos com Zod",
+        "Senha armazenada com bcrypt",
+        "Sessão JWT com NextAuth.js",
+        "Redirecionamento para /dashboard após login",
+        "Middleware de proteção de rotas autenticadas",
+        "Mensagens de erro amigáveis"
+      ]
+    },
+    {
+      "id": "S03",
+      "epic": "E1",
+      "title": "Perfil do usuário",
+      "priority": 3,
+      "passes": false,
+      "description": "Página de perfil onde o usuário pode editar seus dados e foto.",
+      "acceptanceCriteria": [
+        "Página /settings/profile com campos: nome, email, bio, foto",
+        "Upload de foto de perfil para Supabase Storage",
+        "Avatar gerado automaticamente com iniciais quando sem foto",
+        "Formulário de troca de senha",
+        "Toast de sucesso/erro nas atualizações"
+      ]
+    },
+    {
+      "id": "S04",
+      "epic": "E2",
+      "title": "Criação e gestão de Workspace",
+      "priority": 4,
+      "passes": false,
+      "description": "Usuário pode criar um workspace (empresa/equipe) e convidar membros.",
+      "acceptanceCriteria": [
+        "Onboarding após primeiro login para criar ou entrar em workspace",
+        "Formulário de criação: nome, slug único, logo opcional",
+        "Página /settings/workspace para editar dados",
+        "Listagem de membros com papel: Owner, Admin, Member",
+        "Botão de copiar link de convite",
+        "Owner pode remover membros",
+        "Sidebar mostra o workspace ativo e permite trocar entre múltiplos"
+      ]
+    },
+    {
+      "id": "S05",
+      "epic": "E2",
+      "title": "Convite de membros por email",
+      "priority": 5,
+      "passes": false,
+      "description": "Admin pode convidar pessoas por email para o workspace.",
+      "acceptanceCriteria": [
+        "Modal de convite com campo de email e seleção de papel",
+        "Registro do convite no banco (tabela Invitation com token e expiração 7 dias)",
+        "Email de convite enviado via Resend",
+        "Página /invite/[token] para aceitar o convite",
+        "Convite expira e invalida o link após 7 dias",
+        "Convite pendente visível na lista de membros"
+      ]
+    },
+    {
+      "id": "S06",
+      "epic": "E3",
+      "title": "CRUD de Projetos",
+      "priority": 6,
+      "passes": false,
+      "description": "Criar, editar, arquivar e excluir projetos dentro de um workspace.",
+      "acceptanceCriteria": [
+        "Sidebar lista todos os projetos do workspace com ícone e cor customizáveis",
+        "Modal de criação: nome, descrição, cor, ícone emoji, visibilidade (público/privado)",
+        "Página /[workspace]/[project] como rota base do projeto",
+        "Menu de contexto no projeto: editar, arquivar, excluir",
+        "Projetos arquivados ficam em seção colapsável",
+        "Busca de projetos na sidebar"
+      ]
+    },
+    {
+      "id": "S07",
+      "epic": "E3",
+      "title": "Listas dentro de Projetos",
+      "priority": 7,
+      "passes": false,
+      "description": "Cada projeto contém Listas (equivalente às listas do ClickUp) que agrupam tarefas.",
+      "acceptanceCriteria": [
+        "Projeto pode ter múltiplas Listas",
+        "Criação de Lista com nome e cor",
+        "Listas aparecem como seções na view de tarefas",
+        "Reordenar Listas via drag-and-drop",
+        "Deletar Lista (com confirmação, move ou deleta tarefas)"
+      ]
+    },
+    {
+      "id": "S08",
+      "epic": "E4",
+      "title": "CRUD de Tarefas básico",
+      "priority": 8,
+      "passes": false,
+      "description": "Criar, editar e deletar tarefas com atributos essenciais.",
+      "acceptanceCriteria": [
+        "Criação rápida de tarefa inline (pressionar Enter na lista)",
+        "Modal/painel lateral de detalhe da tarefa",
+        "Campos: título, descrição (rich text com TipTap), status, prioridade, responsáveis, data de vencimento",
+        "Status customizáveis por projeto: A Fazer, Em Progresso, Em Revisão, Concluído (+ cores)",
+        "Prioridade: Urgente, Alta, Normal, Baixa (com ícones coloridos)",
+        "Múltiplos responsáveis com avatar",
+        "Data de vencimento com datepicker",
+        "Tarefa pode ter subtarefas (hierarquia 1 nível)",
+        "Deletar tarefa com confirmação"
+      ]
+    },
+    {
+      "id": "S09",
+      "epic": "E4",
+      "title": "Tags e campos customizados",
+      "priority": 9,
+      "passes": false,
+      "description": "Tags coloridas e campos extras configuráveis por projeto.",
+      "acceptanceCriteria": [
+        "Tags: criar, colorir e aplicar múltiplas tags em tarefas",
+        "Gerenciador de tags no settings do projeto",
+        "Campos customizados por projeto: Texto, Número, Data, Dropdown, Checkbox",
+        "Campos customizados aparecem no detalhe da tarefa e são filtráveis",
+        "Estimativa de horas como campo padrão"
+      ]
+    },
+    {
+      "id": "S10",
+      "epic": "E4",
+      "title": "Anexos em tarefas",
+      "priority": 10,
+      "passes": false,
+      "description": "Upload e visualização de arquivos anexados às tarefas.",
+      "acceptanceCriteria": [
+        "Upload de arquivos via drag-drop ou botão no detalhe da tarefa",
+        "Armazenamento no Supabase Storage",
+        "Preview de imagens inline",
+        "Lista de anexos com nome, tamanho e data",
+        "Download e exclusão de anexos",
+        "Limite de 10MB por arquivo"
+      ]
+    },
+    {
+      "id": "S11",
+      "epic": "E5",
+      "title": "Visualização em Lista",
+      "priority": 11,
+      "passes": false,
+      "description": "View padrão de tarefas em formato de lista com agrupamento por status.",
+      "acceptanceCriteria": [
+        "Tarefas agrupadas por Lista ou por Status (toggle)",
+        "Colunas visíveis configuráveis: status, responsável, vencimento, prioridade, tags",
+        "Ordenação por qualquer coluna",
+        "Filtro rápido: responsável, prioridade, vencimento, status",
+        "Busca de tarefas por título dentro do projeto",
+        "Criação inline de tarefa em cada grupo",
+        "Checkbox para marcar como concluída diretamente na lista",
+        "Seleção múltipla com ações em lote (mover, deletar, alterar status)"
+      ]
+    },
+    {
+      "id": "S12",
+      "epic": "E5",
+      "title": "Visualização Kanban (Board)",
+      "priority": 12,
+      "passes": false,
+      "description": "Board estilo Kanban com colunas por status e drag-and-drop.",
+      "acceptanceCriteria": [
+        "Colunas representam os status do projeto",
+        "Cards de tarefa com: título, responsável(is), prioridade, vencimento, contagem de subtarefas",
+        "Drag-and-drop de cards entre colunas (atualiza status)",
+        "Drag-and-drop para reordenar dentro da coluna",
+        "Botão de adicionar tarefa em cada coluna",
+        "Filtros: responsável, prioridade, tag",
+        "Scroll horizontal quando há muitas colunas",
+        "Card com borda colorida pela prioridade"
+      ]
+    },
+    {
+      "id": "S13",
+      "epic": "E5",
+      "title": "Visualização Calendário",
+      "priority": 13,
+      "passes": false,
+      "description": "Visualização de tarefas em formato de calendário mensal.",
+      "acceptanceCriteria": [
+        "Calendário mensal com navegação por mês",
+        "Tarefas aparecem no dia de vencimento",
+        "Cor do evento baseada na prioridade ou status",
+        "Clicar no evento abre o detalhe da tarefa",
+        "Clicar em um dia vazio abre modal de criação de tarefa com data pré-preenchida",
+        "Tarefas sem data ficam em área lateral 'Sem data'"
+      ]
+    },
+    {
+      "id": "S14",
+      "epic": "E6",
+      "title": "Comentários em tarefas",
+      "priority": 14,
+      "passes": false,
+      "description": "Seção de comentários no detalhe da tarefa com rich text e menções.",
+      "acceptanceCriteria": [
+        "Editor de comentários com rich text básico (negrito, itálico, código, listas)",
+        "Menção de membros com @nome (autocomplete)",
+        "Comentário exibe avatar, nome e tempo relativo",
+        "Editar e deletar próprio comentário",
+        "Reações com emoji nos comentários (👍 ✅ 🎉 etc.)",
+        "Comentários em tempo real via Supabase Realtime"
+      ]
+    },
+    {
+      "id": "S15",
+      "epic": "E6",
+      "title": "Notificações",
+      "priority": 15,
+      "passes": false,
+      "description": "Sistema de notificações in-app para atividades relevantes.",
+      "acceptanceCriteria": [
+        "Sino de notificações no header com badge de contagem",
+        "Notificar quando: tarefa atribuída ao usuário, mencionado em comentário, tarefa vence em 1 dia, status alterado em tarefa que participa",
+        "Lista de notificações com link direto para a tarefa",
+        "Marcar como lida individualmente ou todas",
+        "Notificações em tempo real (Supabase Realtime)",
+        "Configuração de quais notificações receber em /settings/notifications"
+      ]
+    },
+    {
+      "id": "S16",
+      "epic": "E7",
+      "title": "Dashboard pessoal (Meu Trabalho)",
+      "priority": 16,
+      "passes": false,
+      "description": "Página inicial com visão geral das tarefas do usuário logado.",
+      "acceptanceCriteria": [
+        "Página /dashboard como home após login",
+        "Seção 'Minhas Tarefas': tarefas atribuídas ao usuário, ordenadas por vencimento",
+        "Seção 'Vencendo Hoje' e 'Atrasadas' em destaque",
+        "Seção 'Atividade Recente': últimas ações no workspace",
+        "Cards de resumo: tarefas concluídas esta semana, tarefas em progresso, tarefas atrasadas",
+        "Atalhos para projetos recentes"
+      ]
+    },
+    {
+      "id": "S17",
+      "epic": "E7",
+      "title": "Relatório de progresso do projeto",
+      "priority": 17,
+      "passes": false,
+      "description": "Página de relatório com métricas e gráficos de progresso do projeto.",
+      "acceptanceCriteria": [
+        "Rota /[workspace]/[project]/reports",
+        "Gráfico de barras: tarefas por status",
+        "Gráfico de linha: tarefas concluídas por semana (últimas 8 semanas)",
+        "Tabela: produtividade por membro (tarefas concluídas, em progresso, atrasadas)",
+        "Percentual de conclusão geral do projeto",
+        "Filtro por período: última semana, mês, trimestre",
+        "Exportar relatório como CSV"
+      ]
+    },
+    {
+      "id": "S18",
+      "epic": "E7",
+      "title": "Busca global",
+      "priority": 18,
+      "passes": false,
+      "description": "Barra de busca global que encontra tarefas, projetos e membros.",
+      "acceptanceCriteria": [
+        "Atalho Cmd/Ctrl+K abre modal de busca (Command Palette)",
+        "Busca em tempo real enquanto digita",
+        "Resultados agrupados: Tarefas, Projetos, Membros",
+        "Setas do teclado para navegar nos resultados",
+        "Enter navega para o resultado selecionado",
+        "Ações rápidas: 'Criar tarefa', 'Ir para projeto'",
+        "Histórico de buscas recentes"
+      ]
+    }
+  ]
+}

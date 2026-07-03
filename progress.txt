@@ -1,0 +1,41 @@
+## Codebase Patterns
+(Lições reutilizáveis descobertas ao longo das iterações. Leia antes de começar.)
+
+- **Stack fixada:** Next.js 14.2 (App Router) + React 18 + TypeScript. NÃO usar Next 15 / React 19.
+- **Tailwind é v3.4** (não v4). shadcn/ui está configurado no estilo CLÁSSICO:
+  - `app/globals.css` usa variáveis HSL (`--primary: 262 83% 58%` etc.) com `@tailwind base/components/utilities`. NÃO usar oklch nem `@import "tailwindcss"`.
+  - `tailwind.config.ts` mapeia as cores via `hsl(var(--...))`, `darkMode: ["class"]`, plugin `tailwindcss-animate`.
+  - Componentes shadcn usam `@radix-ui/*` + `class-variance-authority` + `cn()` de `lib/utils.ts`. NÃO usar `@base-ui/react`.
+  - Cor primária da marca = violeta ClickUp `#7C3AED` = `hsl(262 83% 58%)`.
+  - Ao rodar `npx shadcn@latest add <comp>`: a CLI mais nova pode gerar código estilo "base-nova"/Tailwind v4. Se isso acontecer, adaptar para o estilo clássico (Radix + HSL) antes de commitar.
+- **Prisma é v6** (fixado). Prisma 7 removeu `url`/`directUrl` do schema (exige driver adapters + prisma.config.ts) — por isso ficamos no 6. Generator: `prisma-client-js`. Cliente importado de `@prisma/client`.
+- **Variáveis de ambiente:**
+  - `.env` (gitignored) → `DATABASE_URL` e `DIRECT_URL`. **O Prisma CLI só lê `.env`, não `.env.local`.**
+  - `.env.local` (gitignored) → segredos de app (NextAuth, Supabase, Resend). Lido pelo Next.js.
+  - `.env.example` (versionado) → documenta todas as variáveis.
+- **Singleton do Prisma:** importar `{ db }` de `lib/db.ts` (NÃO instanciar `new PrismaClient()` avulso).
+- **Tipos globais:** importar de `@/types` (reexporta models/enums do Prisma).
+- **Convenções:** arquivos em kebab-case, componentes em PascalCase. Rotas autenticadas em `/(app)/`, públicas `/login` `/register` `/invite/[token]`. Mutations via Server Actions. Validação com Zod.
+- **npm tem allow-scripts ativo:** postinstall de pacotes (ex.: engines do Prisma) pode ser bloqueado com aviso. `npx prisma generate` funciona mesmo assim; se um engine faltar, rode `npm approve-scripts`.
+- **Checks de qualidade:** `npm run typecheck`, `npm run lint`, `npm run build`, `npm run format`. Todos devem passar antes do commit.
+- **Preview/screenshot:** o `preview_screenshot` deu timeout neste ambiente mesmo com o server retornando 200. Verificação via `preview_logs` (HTTP 200) + `npm run build` é suficiente.
+
+---
+
+## 2026-07-02 - S01 - Setup inicial do projeto
+- Scaffold do Next.js 14 (App Router, TS, Tailwind, ESLint) via `create-next-app@14` (movi `kaizen-prd.json` temporariamente pois a CLI recusa diretório não-vazio).
+- Branch renomeada `master` -> `main` (conforme `branchName` do PRD) e git inicializado.
+- shadcn/ui inicializado; **reescrito para o estilo clássico** (Tailwind v3 + Radix) porque a CLI nova gerou "base-nova" (Tailwind v4 + @base-ui), incompatível com a v3 instalada.
+- Prisma configurado (v6) com o schema completo do PRD (User, Workspace, Project, Task, e todos os relacionados). `prisma validate` OK, client gerado.
+- Cor primária da marca aplicada (#7C3AED / violeta) nas variáveis HSL do tema.
+- `.env.example` documentando todas as variáveis; `.env` (Prisma) e `.env.local` (app) com placeholders; `.gitignore` ajustado para ignorar `.env`/`.env*.local` e versionar `.env.example`.
+- ESLint + Prettier configurados (`.prettierrc.json`, `.prettierignore`, extends "prettier" no ESLint), scripts npm: typecheck/format/db:*.
+- Estrutura de pastas: `/app`, `/components/ui`, `/lib` (db.ts, utils.ts), `/prisma`, `/types`.
+- Landing page mínima em `app/page.tsx` usando `<Button asChild>` (valida shadcn + tema).
+- **Files changed:** package.json, tailwind.config.ts, app/globals.css, app/layout.tsx, app/page.tsx, components/ui/button.tsx, components.json, lib/db.ts, lib/utils.ts, types/index.ts, prisma/schema.prisma, .env, .env.local, .env.example, .prettierrc.json, .prettierignore, .eslintrc.json, .gitignore, .claude/launch.json.
+- **Checks:** typecheck ✓, lint ✓, build ✓ (5 páginas estáticas), format ✓.
+- **Learnings for future iterations:**
+  - Ver a seção **Codebase Patterns** no topo — todas as decisões de stack (Prisma v6, Tailwind v3, shadcn clássico) estão lá.
+  - `create-next-app` recusa diretório com arquivos "estranhos" (ex.: o PRD) — mova-os antes e restaure depois.
+  - A CLI do shadcn hoje aponta para Tailwind v4/base-ui; sempre conferir o output ao adicionar componentes.
+---
