@@ -37,3 +37,9 @@ export type TaskListItem = {
   attachments: AttachmentItem[];
   subtasks: SubtaskItem[];
 };
+
+/** Tarefa com o contexto da lista (usado na visualização em lista/agrupamento). */
+export type TaskViewItem = TaskListItem & { listId: string; listName: string };
+
+export type ListRef = { id: string; name: string; color: string };
+export type ColumnKey = "status" | "assignees" | "dueDate" | "priority" | "tags";

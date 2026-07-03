@@ -42,6 +42,7 @@ Registrar aprendizados em `progress.txt` (ler a seção **Codebase Patterns** no
 - Tarefas: `@/lib/actions/task`. Cria com o 1º status; "concluído" = último status (maior `order`). Prioridade meta em `@/lib/tasks`.
 - Descrição de tarefa/comentário = rich text **TipTap** (`@/components/ui/rich-text-editor`, client-only, `immediatelyRender:false`), salvo como HTML.
 - **Não rodar `npm run build` com o preview (dev server) rodando** — corrompe o `.next`. Parar preview antes.
+- A página do projeto usa `TaskListView` (`@/components/task/task-list-view`): agrupar por lista/status, filtros, ordenação, colunas, seleção múltipla (`@/lib/actions/task-bulk`). Tags/campos/anexos ficam no `TaskDetailSheet`. Gerenciar tags/campos em `/[workspace]/[project]/settings`.
 
 ## Variáveis de ambiente
 

@@ -225,7 +225,7 @@
       "epic": "E5",
       "title": "Visualização em Lista",
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "description": "View padrão de tarefas em formato de lista com agrupamento por status.",
       "acceptanceCriteria": [
         "Tarefas agrupadas por Lista ou por Status (toggle)",

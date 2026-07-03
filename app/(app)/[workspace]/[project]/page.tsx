@@ -5,9 +5,8 @@ import { Settings } from "lucide-react";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { ListsView } from "@/components/list/lists-view";
-import { TasksList } from "@/components/task/tasks-list";
-import type { TaskListItem } from "@/components/task/types";
+import { TaskListView } from "@/components/task/task-list-view";
+import type { TaskViewItem } from "@/components/task/types";
 
 export const metadata: Metadata = {
   title: "Projeto · Kaizen",
@@ -86,11 +85,9 @@ export default async function ProjectPage({
   const projectFields = project.customFields;
 
   const lists = project.lists.map((l) => ({ id: l.id, name: l.name, color: l.color }));
-  const counts: Record<string, number> = {};
-  const bodies: Record<string, React.ReactNode> = {};
 
-  for (const list of project.lists) {
-    const tasks: TaskListItem[] = list.tasks.map((t) => ({
+  const tasks: TaskViewItem[] = project.lists.flatMap((list) =>
+    list.tasks.map((t) => ({
       id: t.id,
       title: t.title,
       description: t.description,
@@ -110,19 +107,10 @@ export default async function ProjectPage({
         createdAt: a.createdAt.toISOString(),
       })),
       subtasks: t.subtasks,
-    }));
-    counts[list.id] = tasks.length;
-    bodies[list.id] = (
-      <TasksList
-        listId={list.id}
-        tasks={tasks}
-        statuses={statuses}
-        members={members}
-        projectTags={projectTags}
-        projectFields={projectFields}
-      />
-    );
-  }
+      listId: list.id,
+      listName: list.name,
+    }))
+  );
 
   return (
     <div className="space-y-6">
@@ -148,7 +136,15 @@ export default async function ProjectPage({
         </Link>
       </div>
 
-      <ListsView projectId={project.id} initialLists={lists} counts={counts} bodies={bodies} />
+      <TaskListView
+        projectId={project.id}
+        lists={lists}
+        tasks={tasks}
+        statuses={statuses}
+        members={members}
+        projectTags={projectTags}
+        projectFields={projectFields}
+      />
     </div>
   );
 }
