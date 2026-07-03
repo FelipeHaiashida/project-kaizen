@@ -35,6 +35,14 @@ Registrar aprendizados em `progress.txt` (ler a seção **Codebase Patterns** no
 - Convites: `Invitation.email` null = link aberto (reusável); com email = uso único. Actions em `@/lib/actions/invitation`. Página pública `/invite/[token]`.
 - Email: `sendInvitationEmail` de `@/lib/email` (Resend). **Modo teste só entrega ao email dono da conta Resend** — pra terceiros, verificar domínio e ajustar `EMAIL_FROM`. Nunca lança; sempre cheque `{ sent }`.
 
+## Projetos, Listas e Tarefas
+
+- Projeto: rota base `/[workspace]/[project]`. `createProject` (de `@/lib/actions/project`) semeia 4 status + lista "Tarefas". Excluir usa cascata manual (transação) — sem `onDelete: Cascade` no schema.
+- Listas: `@/lib/actions/list` (create/update/delete/reorder). Reorder via `@dnd-kit`.
+- Tarefas: `@/lib/actions/task`. Cria com o 1º status; "concluído" = último status (maior `order`). Prioridade meta em `@/lib/tasks`.
+- Descrição de tarefa/comentário = rich text **TipTap** (`@/components/ui/rich-text-editor`, client-only, `immediatelyRender:false`), salvo como HTML.
+- **Não rodar `npm run build` com o preview (dev server) rodando** — corrompe o `.next`. Parar preview antes.
+
 ## Variáveis de ambiente
 
 - `.env` → `DATABASE_URL`, `DIRECT_URL` (**o Prisma CLI só lê `.env`**).

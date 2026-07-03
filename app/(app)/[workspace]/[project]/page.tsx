@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { ListsView } from "@/components/list/lists-view";
+import { TasksList } from "@/components/task/tasks-list";
+import type { TaskListItem } from "@/components/task/types";
 
 export const metadata: Metadata = {
   title: "Projeto · Kaizen",
@@ -28,16 +30,66 @@ export default async function ProjectPage({
       description: true,
       color: true,
       icon: true,
+      workspaceId: true,
+      statuses: { orderBy: { order: "asc" }, select: { id: true, name: true, color: true } },
       lists: {
         orderBy: { order: "asc" },
-        select: { id: true, name: true, color: true, _count: { select: { tasks: true } } },
+        select: {
+          id: true,
+          name: true,
+          color: true,
+          tasks: {
+            where: { parentId: null },
+            orderBy: { order: "asc" },
+            select: {
+              id: true,
+              title: true,
+              description: true,
+              priority: true,
+              dueDate: true,
+              statusId: true,
+              status: { select: { name: true, color: true } },
+              assignees: { select: { user: { select: { id: true, name: true, image: true } } } },
+              subtasks: {
+                orderBy: { order: "asc" },
+                select: { id: true, title: true, statusId: true },
+              },
+            },
+          },
+        },
       },
     },
   });
   if (!project) notFound();
 
+  const memberRows = await db.workspaceMember.findMany({
+    where: { workspaceId: project.workspaceId },
+    select: { user: { select: { id: true, name: true, image: true } } },
+  });
+  const members = memberRows.map((m) => m.user);
+  const statuses = project.statuses;
+
   const lists = project.lists.map((l) => ({ id: l.id, name: l.name, color: l.color }));
-  const counts = Object.fromEntries(project.lists.map((l) => [l.id, l._count.tasks]));
+  const counts: Record<string, number> = {};
+  const bodies: Record<string, React.ReactNode> = {};
+
+  for (const list of project.lists) {
+    const tasks: TaskListItem[] = list.tasks.map((t) => ({
+      id: t.id,
+      title: t.title,
+      description: t.description,
+      priority: t.priority,
+      dueDate: t.dueDate ? t.dueDate.toISOString() : null,
+      statusId: t.statusId,
+      status: t.status,
+      assignees: t.assignees.map((a) => a.user),
+      subtasks: t.subtasks,
+    }));
+    counts[list.id] = tasks.length;
+    bodies[list.id] = (
+      <TasksList listId={list.id} tasks={tasks} statuses={statuses} members={members} />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -56,7 +108,7 @@ export default async function ProjectPage({
         </div>
       </div>
 
-      <ListsView projectId={project.id} initialLists={lists} counts={counts} />
+      <ListsView projectId={project.id} initialLists={lists} counts={counts} bodies={bodies} />
     </div>
   );
 }

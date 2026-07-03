@@ -175,7 +175,7 @@
       "epic": "E4",
       "title": "CRUD de Tarefas básico",
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "description": "Criar, editar e deletar tarefas com atributos essenciais.",
       "acceptanceCriteria": [
         "Criação rápida de tarefa inline (pressionar Enter na lista)",

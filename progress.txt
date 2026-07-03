@@ -55,6 +55,12 @@
   - **`SortableListSection` aceita `children`** (área de tarefas) — a S08 injeta as tarefas por lista via prop `bodies` do `ListsView`. Sem children mostra "Nenhuma tarefa".
 - **dnd-kit instalado** (`@dnd-kit/core|sortable|utilities`). Reordenar via drag é implementado; **não dá pra simular o arraste no preview headless de forma confiável** — validar reorder manualmente ou por teste de action.
 - **NÃO rodar `npm run build` com o dev server (preview) rodando** — os artefatos de produção colidem com o cache dev e quebram o dev server ("Cannot find module './XXX.js'"). Se acontecer: parar o preview, `rm -rf .next`, reiniciar. Rodar o build só com o preview parado.
+- **Tarefas:** actions em `lib/actions/task.ts` (createTask com parentId opcional pra subtarefa, updateTask com responsáveis, setTaskStatus, deleteTask com cascata de subtarefas). Prioridade meta em `lib/tasks.ts` (`PRIORITIES`/`PRIORITY_MAP`). Ao criar tarefa usa o **primeiro status** do projeto; "concluído" = **último status** (maior order).
+  - UI: `ListsView` passa `bodies[listId] = <TasksList/>` (Server Component com filhos client) — **Server Components podem ser passados como prop (não só children) para Client Components**. `TasksList` = TaskRow (client, abre `TaskDetailSheet`) + `InlineTaskCreate` (Enter cria).
+  - `TaskDetailSheet` (painel lateral via `components/ui/sheet.tsx`, Radix Dialog ancorado à direita): título, descrição (**TipTap** via `components/ui/rich-text-editor.tsx`, `immediatelyRender:false`), status/prioridade (select nativo), responsáveis (chips toggle com avatar), vencimento (`input type=date`), subtarefas (checkbox conclui via status, add por Enter, excluir), excluir tarefa. Campos principais em `useState` local (persistem entre `router.refresh()`); subtarefas vêm do prop `task` (atualizam no refresh).
+  - Tipos compartilhados em `components/task/types.ts`.
+- **TipTap** instalado (`@tiptap/react|starter-kit|pm`, v3). Editor client-only com `immediatelyRender:false` (evita erro de SSR no Next). Descrição salva como HTML em `Task.description`. Sem plugin de typography — estilos de lista/código aplicados via classes utilitárias no `editorProps`.
+- **Simular teclado/select no preview:** inputs controlados → `preview_fill`; `<select>` controlado e Enter → `preview_eval` (setar `.value` com o native setter + `dispatchEvent(new Event('change'))`, ou `dispatchEvent(new KeyboardEvent('keydown',{key:'Enter'}))`). `contenteditable` do TipTap não é preenchível por `preview_fill`.
 - **Singleton do Prisma:** importar `{ db }` de `lib/db.ts` (NÃO instanciar `new PrismaClient()` avulso).
 - **Tipos globais:** importar de `@/types` (reexporta models/enums do Prisma).
 - **Convenções:** arquivos em kebab-case, componentes em PascalCase. Rotas autenticadas em `/(app)/`, públicas `/login` `/register` `/invite/[token]`. Mutations via Server Actions. Validação com Zod.
@@ -139,4 +145,12 @@
 - **Checks:** typecheck ✓, lint ✓, build ✓ (10 rotas), format ✓.
 - **Verificação funcional (preview + DB + Resend):** convite pelo modal cria Invitation pendente e aparece na lista ✓; **Resend chamada de verdade** (403 esperado no modo teste — só entrega ao dono da conta; fallback ok) ✓; fluxo completo: novo usuário abre link → cria conta (callbackUrl) → volta ao convite → **aceita e vira MEMBER** ✓; convite de email vira uso único (link mostra "indisponível" depois) ✓; convite expirado → "indisponível" ✓. Dados de teste removidos.
 - **Learnings:** ver **Codebase Patterns** (blocos Email/Resend, Convites, redirectTo/callbackUrl).
+---
+
+## 2026-07-03 - S06/S07/S08 (grupo acelerado) - Projetos, Listas, Tarefas
+- **S06 CRUD de Projetos:** sidebar de projetos (busca, arquivados colapsáveis, menu editar/arquivar/excluir), `ProjectFormDialog` (cor/emoji/visibilidade), rota base `/[workspace]/[project]`. `createProject` semeia 4 status + lista "Tarefas". `visibility` PUBLIC/PRIVATE adicionada ao schema. Verificado: criar (com defaults no banco), sidebar, página, excluir (cascata). Commit eeb8335.
+- **S07 Listas:** `ListsView` com drag-and-drop (`@dnd-kit`) reordenando seções; `ListFormDialog` (nome+cor); excluir com cascata. Seções renderizam como área de tarefas. Verificado: criar, excluir; reorder implementado (arraste headless não simulado). Commit 04d9d31.
+- **S08 CRUD de Tarefas:** criação inline (Enter), painel lateral de detalhe com título/descrição(TipTap)/status/prioridade/responsáveis/vencimento/subtarefas, prioridade com ícone colorido, múltiplos responsáveis com avatar, subtarefas (1 nível), excluir com confirmação. Verificado ponta a ponta no preview + banco: inline create, editar todos os campos (URGENT/data/responsável/subtarefa persistiram), excluir (tarefa+subtarefa).
+- **Checks (cada story):** typecheck ✓, lint ✓, build ✓, format ✓.
+- **Learnings:** ver **Codebase Patterns** (blocos Projetos, Listas, Tarefas, dnd-kit, TipTap, e o aviso de build vs dev server).
 ---
