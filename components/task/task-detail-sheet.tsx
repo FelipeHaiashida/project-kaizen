@@ -9,6 +9,8 @@ import type { Priority } from "@prisma/client";
 import { updateTask, deleteTask, createTask, setTaskStatus } from "@/lib/actions/task";
 import { setTaskTags } from "@/lib/actions/tag";
 import { setTaskFieldValue, setTaskEstimate } from "@/lib/actions/custom-field";
+import { setTaskEpic, createEpic } from "@/lib/actions/epic";
+import { EPIC_COLORS } from "@/lib/validations/epic";
 import { PRIORITIES } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -24,6 +26,7 @@ import type {
   StatusOption,
   MemberOption,
   TagRef,
+  EpicRef,
   ProjectField,
 } from "@/components/task/types";
 
@@ -36,7 +39,9 @@ export function TaskDetailSheet({
   statuses,
   members,
   projectTags,
+  projectEpics,
   projectFields,
+  projectId,
   currentUserId,
   open,
   onOpenChange,
@@ -46,7 +51,9 @@ export function TaskDetailSheet({
   statuses: StatusOption[];
   members: MemberOption[];
   projectTags: TagRef[];
+  projectEpics: EpicRef[];
   projectFields: ProjectField[];
+  projectId: string;
   currentUserId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -61,6 +68,9 @@ export function TaskDetailSheet({
   const [dueDate, setDueDate] = useState(task.dueDate ? task.dueDate.slice(0, 10) : "");
   const [assigneeIds, setAssigneeIds] = useState<string[]>(task.assignees.map((a) => a.id));
   const [tagIds, setTagIds] = useState<string[]>(task.tags.map((t) => t.id));
+  const [epicId, setEpicId] = useState<string>(task.epic?.id ?? "");
+  const [creatingEpic, setCreatingEpic] = useState(false);
+  const [newEpicName, setNewEpicName] = useState("");
   const [estimate, setEstimate] = useState(
     task.estimateHours != null ? String(task.estimateHours) : ""
   );
@@ -95,11 +105,30 @@ export function TaskDetailSheet({
         return;
       }
       await setTaskTags(task.id, tagIds);
+      await setTaskEpic(task.id, epicId || null);
       await setTaskEstimate(task.id, estimate.trim() === "" ? null : Number(estimate));
       for (const field of projectFields) {
         await setTaskFieldValue(task.id, field.id, fieldValues[field.id] ?? null);
       }
       toast.success("Tarefa salva");
+      router.refresh();
+    });
+  }
+
+  function addEpic() {
+    const name = newEpicName.trim();
+    if (!name) return;
+    const color = EPIC_COLORS[Math.floor(name.length % EPIC_COLORS.length)];
+    startTransition(async () => {
+      const r = await createEpic(projectId, { name, color });
+      if (r.error) {
+        toast.error(r.error);
+        return;
+      }
+      if (r.epicId) setEpicId(r.epicId);
+      setNewEpicName("");
+      setCreatingEpic(false);
+      toast.success("Épico criado");
       router.refresh();
     });
   }
@@ -213,6 +242,60 @@ export function TaskDetailSheet({
               );
             })}
           </div>
+        </div>
+
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">Épico</Label>
+          {creatingEpic ? (
+            <div className="flex gap-2">
+              <Input
+                value={newEpicName}
+                onChange={(e) => setNewEpicName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addEpic();
+                  }
+                }}
+                placeholder="Nome do novo épico"
+                autoFocus
+              />
+              <Button type="button" size="sm" onClick={addEpic} disabled={isPending}>
+                Criar
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setCreatingEpic(false)}
+              >
+                Cancelar
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <select
+                className={selectClass}
+                value={epicId}
+                onChange={(e) => setEpicId(e.target.value)}
+              >
+                <option value="">Nenhum</option>
+                {projectEpics.map((ep) => (
+                  <option key={ep.id} value={ep.id}>
+                    {ep.name}
+                  </option>
+                ))}
+              </select>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setCreatingEpic(true)}
+              >
+                + Novo
+              </Button>
+            </div>
+          )}
         </div>
 
         {projectTags.length > 0 && (

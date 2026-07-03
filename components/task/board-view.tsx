@@ -36,6 +36,7 @@ import type {
   StatusOption,
   MemberOption,
   TagRef,
+  EpicRef,
   ProjectField,
   ListRef,
 } from "@/components/task/types";
@@ -63,6 +64,14 @@ function BoardCard({
       style={{ borderLeft: `3px solid ${p.color}` }}
     >
       <p className="mb-1 line-clamp-2">{task.title}</p>
+      {task.epic && (
+        <span
+          className="mb-1 inline-block rounded-full px-1.5 py-0.5 text-[10px] font-medium text-white"
+          style={{ backgroundColor: task.epic.color }}
+        >
+          {task.epic.name}
+        </span>
+      )}
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <PriorityIcon priority={task.priority} />
         {task.dueDate && (
@@ -157,11 +166,13 @@ function Column({
 }
 
 export function BoardView({
+  projectId,
   lists,
   tasks,
   statuses,
   members,
   projectTags,
+  projectEpics,
   projectFields,
   currentUserId,
 }: {
@@ -171,6 +182,7 @@ export function BoardView({
   statuses: StatusOption[];
   members: MemberOption[];
   projectTags: TagRef[];
+  projectEpics: EpicRef[];
   projectFields: ProjectField[];
   currentUserId: string;
 }) {
@@ -178,6 +190,7 @@ export function BoardView({
   const [fAssignee, setFAssignee] = useState("");
   const [fPriority, setFPriority] = useState("");
   const [fTag, setFTag] = useState("");
+  const [fEpic, setFEpic] = useState("");
   const [openTaskId, setOpenTaskId] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -192,10 +205,11 @@ export function BoardView({
         if (fAssignee && !t.assignees.some((a) => a.id === fAssignee)) return false;
         if (fPriority && t.priority !== fPriority) return false;
         if (fTag && !t.tags.some((tg) => tg.id === fTag)) return false;
+        if (fEpic && t.epic?.id !== fEpic) return false;
         return true;
       })
       .sort((a, b) => a.title.localeCompare(b.title));
-  }, [tasks, fAssignee, fPriority, fTag]);
+  }, [tasks, fAssignee, fPriority, fTag, fEpic]);
 
   const buildItems = () => {
     const map: Record<string, string[]> = {};
@@ -208,7 +222,7 @@ export function BoardView({
   useEffect(() => {
     setItems(buildItems());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tasks, fAssignee, fPriority, fTag]);
+  }, [tasks, fAssignee, fPriority, fTag, fEpic]);
 
   function findContainer(id: string): string | undefined {
     if (id in items) return id;
@@ -332,6 +346,16 @@ export function BoardView({
             </option>
           ))}
         </select>
+        {projectEpics.length > 0 && (
+          <select value={fEpic} onChange={(e) => setFEpic(e.target.value)} className={selectClass}>
+            <option value="">Todo épico</option>
+            {projectEpics.map((ep) => (
+              <option key={ep.id} value={ep.id}>
+                {ep.name}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       <DndContext
@@ -363,7 +387,9 @@ export function BoardView({
           statuses={statuses}
           members={members}
           projectTags={projectTags}
+          projectEpics={projectEpics}
           projectFields={projectFields}
+          projectId={projectId}
           currentUserId={currentUserId}
           open={!!openTask}
           onOpenChange={(o) => !o && setOpenTaskId(null)}

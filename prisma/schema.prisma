@@ -96,11 +96,21 @@ model Project {
   statuses     TaskStatus[]
   tags         Tag[]
   customFields CustomField[]
+  epics        Epic[]
 }
 
 enum Visibility {
   PUBLIC
   PRIVATE
+}
+
+model Epic {
+  id        String  @id @default(cuid())
+  name      String
+  color     String
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+  tasks     Task[]
 }
 
 model List {
@@ -131,6 +141,7 @@ model Task {
   dueDate       DateTime?
   estimateHours Int?
   parentId      String?
+  epicId        String?
   order         Int            @default(0)
   listId        String
   statusId      String
@@ -138,6 +149,7 @@ model Task {
   updatedAt     DateTime       @updatedAt
   list          List           @relation(fields: [listId], references: [id])
   status        TaskStatus     @relation(fields: [statusId], references: [id])
+  epic          Epic?          @relation(fields: [epicId], references: [id])
   parent        Task?          @relation("Subtasks", fields: [parentId], references: [id])
   subtasks      Task[]         @relation("Subtasks")
   assignees     TaskAssignee[]

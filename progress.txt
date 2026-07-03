@@ -202,3 +202,9 @@
 - Actions em lib/actions/announcement.ts: get (com read status), getUnreadCount, markAnnouncementsRead, create/update/delete (só Owner/Admin), notifica todos os membros ao publicar (link /avisos).
 - UI: /avisos (AnnouncementBoard client): cards com borda por nível, badge Fixado, autor+tempo relativo, nível colorido; ordenado pinned desc + createdAt desc; AnnouncementFormDialog (título, conteúdo TipTap, nível, fixar). Member vê read-only (sem criar/editar/excluir). Marca lido ao visualizar (useEffect). Link "Avisos" na sidebar com badge de não lidos (server). Estado vazio.
 - Verificado: owner cria (URGENT+fixado) → card renderiza + Bruno recebe notif ANNOUNCEMENT; membro vê read-only (sem botões) e badge some ao visualizar.
+
+## Feature extra - Campo Épico (a pedido do usuário)
+- Model Epic (id, name, color, projectId) + Task.epicId (um épico por tarefa, por projeto). deleteProject também apaga epics; deleteEpic seta epicId->null nas tarefas.
+- Actions em lib/actions/epic.ts (create/update/delete/setTaskEpic). Gerenciado em EpicManager (settings do projeto, como TagManager) + criação inline "+ Novo" no TaskDetailSheet (select de épico). Épico salvo junto no save() da tarefa via setTaskEpic.
+- Display: badge do épico na ListViewRow (coluna "Épico") e no BoardCard. Filtro "Todo épico" na TaskListView e no BoardView. Tipo EpicRef + campo epic em TaskListItem; projectEpics propagado página->ProjectViews->views->sheet.
+- **Windows/Prisma:** o `npm run dev` trava o query_engine dll — `prisma generate` dá EPERM. Parar o dev (processo na porta 3000) antes de regenerar o client após mudança de schema.

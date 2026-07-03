@@ -12,6 +12,7 @@ import type {
   StatusOption,
   MemberOption,
   TagRef,
+  EpicRef,
   ProjectField,
   ListRef,
 } from "@/components/task/types";
@@ -25,6 +26,7 @@ export interface ProjectViewsProps {
   statuses: StatusOption[];
   members: MemberOption[];
   projectTags: TagRef[];
+  projectEpics: EpicRef[];
   projectFields: ProjectField[];
   currentUserId: string;
 }

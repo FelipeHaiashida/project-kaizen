@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TagManager } from "@/components/project/tag-manager";
 import { CustomFieldManager } from "@/components/project/custom-field-manager";
+import { EpicManager } from "@/components/project/epic-manager";
 
 export const metadata: Metadata = {
   title: "Configurações do projeto · Kaizen",
@@ -34,6 +35,7 @@ export default async function ProjectSettingsPage({
         orderBy: { order: "asc" },
         select: { id: true, name: true, type: true, options: true },
       },
+      epics: { orderBy: { name: "asc" }, select: { id: true, name: true, color: true } },
     },
   });
   if (!project) notFound();
@@ -50,6 +52,18 @@ export default async function ProjectSettingsPage({
         </Link>
         <h1 className="text-2xl font-bold tracking-tight">Configurações do projeto</h1>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Épicos</CardTitle>
+          <CardDescription>
+            Grandes temas para agrupar tarefas (um épico por tarefa)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <EpicManager projectId={project.id} epics={project.epics} />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

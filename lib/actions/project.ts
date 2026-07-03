@@ -102,6 +102,7 @@ export async function deleteProject(projectId: string): Promise<ProjectActionSta
     db.taskStatus.deleteMany({ where: { projectId } }),
     db.tag.deleteMany({ where: { projectId } }),
     db.customField.deleteMany({ where: { projectId } }),
+    db.epic.deleteMany({ where: { projectId } }),
     db.project.delete({ where: { id: projectId } }),
   ]);
 

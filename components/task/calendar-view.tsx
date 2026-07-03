@@ -18,6 +18,7 @@ import type {
   StatusOption,
   MemberOption,
   TagRef,
+  EpicRef,
   ProjectField,
   ListRef,
 } from "@/components/task/types";
@@ -48,9 +49,11 @@ function dayKey(d: Date) {
 export function CalendarView({
   lists,
   tasks,
+  projectId,
   statuses,
   members,
   projectTags,
+  projectEpics,
   projectFields,
   currentUserId,
 }: {
@@ -60,6 +63,7 @@ export function CalendarView({
   statuses: StatusOption[];
   members: MemberOption[];
   projectTags: TagRef[];
+  projectEpics: EpicRef[];
   projectFields: ProjectField[];
   currentUserId: string;
 }) {
@@ -243,7 +247,9 @@ export function CalendarView({
           statuses={statuses}
           members={members}
           projectTags={projectTags}
+          projectEpics={projectEpics}
           projectFields={projectFields}
+          projectId={projectId}
           currentUserId={currentUserId}
           open={!!openTask}
           onOpenChange={(o) => !o && setOpenTaskId(null)}

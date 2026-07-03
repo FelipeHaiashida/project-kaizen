@@ -61,6 +61,20 @@ export function ListViewRow({
           {PRIORITY_MAP[task.priority].label}
         </span>
       )}
+      {columns.has("epic") && (
+        <span className="w-24 shrink-0 truncate text-xs">
+          {task.epic ? (
+            <span
+              className="rounded-full px-1.5 py-0.5 text-[10px] font-medium text-white"
+              style={{ backgroundColor: task.epic.color }}
+            >
+              {task.epic.name}
+            </span>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )}
+        </span>
+      )}
       {columns.has("status") && (
         <span className="flex w-28 shrink-0 items-center gap-1 text-xs">
           <span className="h-2 w-2 rounded-full" style={{ backgroundColor: task.status.color }} />
