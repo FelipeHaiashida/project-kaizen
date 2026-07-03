@@ -19,6 +19,13 @@ Registrar aprendizados em `progress.txt` (ler a seção **Codebase Patterns** no
 - Tipos globais: importar de `@/types`. UI reutilizável em `components/ui/` (shadcn) e `components/`.
 - Arquivos em kebab-case; componentes em PascalCase. Cor da marca: `#7C3AED`.
 
+## Autenticação (NextAuth v5)
+
+- Sessão: em Server Component use `const session = await auth()` (de `@/lib/auth`). Logout: `signOut({ redirectTo: "/login" })`.
+- `lib/auth.config.ts` é edge-safe (usado no `middleware.ts`) — não importe Prisma/bcrypt nele. Provider de credenciais fica em `lib/auth.ts`.
+- Rotas públicas: `/`, `/login`, `/register`, `/invite/*`. Todo o resto exige login (ver callback `authorized`). Área logada em `app/(app)/`.
+- Senhas com `bcryptjs`. Componentes shadcn: escrever à mão no estilo clássico (não usar `npx shadcn add`).
+
 ## Variáveis de ambiente
 
 - `.env` → `DATABASE_URL`, `DIRECT_URL` (**o Prisma CLI só lê `.env`**).

@@ -78,7 +78,7 @@
       "epic": "E1",
       "title": "Autenticação com email e senha",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "description": "Implementar login e registro com email/senha usando NextAuth.js v5.",
       "acceptanceCriteria": [
         "Página /login com formulário de email e senha",

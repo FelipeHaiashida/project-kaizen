@@ -19,6 +19,18 @@
   - Testar conexão avulsa: `node --env-file=.env -e "..."` (não há `dotenv` instalado; o Node 24 tem `--env-file`).
   - Falta `SUPABASE_SERVICE_ROLE_KEY` no `.env.local` (necessária só a partir da S03/Storage).
 - **Integração MCP do Supabase aponta para OUTRA conta** (anabeatrizleite235), não a do projeto atual. Portanto NÃO dá para usar as tools MCP (list_tables, advisors, logs, apply_migration) contra este banco — usar Prisma diretamente.
+- **Autenticação (NextAuth v5 / Auth.js beta):** já configurada. Padrão em uso:
+  - `lib/auth.config.ts` = config edge-safe (SEM Prisma/bcrypt) usada pelo `middleware.ts`. `lib/auth.ts` = config completa com o provider `Credentials` (usa Prisma + bcryptjs). Exporta `{ handlers, auth, signIn, signOut }`.
+  - Sessão **JWT** (`strategy: "jwt"`). `secret` vem de `NEXTAUTH_SECRET`; `trustHost: true`.
+  - Proteção de rotas: callback `authorized` em `auth.config.ts` (públicas: `/`, `/login`, `/register`, `/invite/*`; resto exige login). `middleware.ts` = `NextAuth(authConfig).auth` com matcher que exclui `api/auth` e assets.
+  - `id` do usuário propagado via callbacks `jwt`/`session` + augmentação de tipos em `types/next-auth.d.ts`.
+  - Para pegar a sessão em Server Component: `const session = await auth()`. Logout: `<form action={async()=>{"use server"; await signOut({redirectTo:"/login"})}}>`.
+  - **Senhas com `bcryptjs`** (puro JS — evita build nativo no Windows), 10 rounds.
+  - Mutations de auth em `app/(auth)/actions.ts` (Server Actions) — validam com Zod e retornam `{ error }`; o redirect do `signIn` é repassado (re-throw se não for `AuthError`).
+- **Zod é v4** — `z.string().email()` ainda funciona; erros via `parsed.error.issues[0].message`.
+- **Componentes shadcn adicionados à mão** (estilo clássico Radix v3): `input`, `label` (usa `@radix-ui/react-label`), `card`. Continuar escrevendo à mão em vez de `npx shadcn add`.
+- **Grupos de rota:** `app/(auth)/` (login/registro, layout centralizado) e `app/(app)/` (área logada, layout com header + logout, valida `auth()`). Route groups não afetam a URL.
+- **Verificação no preview:** `preview_screenshot` dá timeout neste ambiente, mas **`preview_snapshot` (árvore de acessibilidade) funciona** e é ótimo para verificar texto/estrutura. Fluxos podem ser testados com `preview_fill`/`preview_click` + checagem no banco via `node --env-file=.env`.
 - **Singleton do Prisma:** importar `{ db }` de `lib/db.ts` (NÃO instanciar `new PrismaClient()` avulso).
 - **Tipos globais:** importar de `@/types` (reexporta models/enums do Prisma).
 - **Convenções:** arquivos em kebab-case, componentes em PascalCase. Rotas autenticadas em `/(app)/`, públicas `/login` `/register` `/invite/[token]`. Mutations via Server Actions. Validação com Zod.
@@ -44,4 +56,24 @@
   - Ver a seção **Codebase Patterns** no topo — todas as decisões de stack (Prisma v6, Tailwind v3, shadcn clássico) estão lá.
   - `create-next-app` recusa diretório com arquivos "estranhos" (ex.: o PRD) — mova-os antes e restaure depois.
   - A CLI do shadcn hoje aponta para Tailwind v4/base-ui; sempre conferir o output ao adicionar componentes.
+---
+
+## 2026-07-02 - Infra - Banco Supabase configurado
+- Criado projeto Supabase `kaizen` (ref kyrvyqtjlrxgzbrhxjiz, região ca-central-1) na conta do usuário.
+- `.env` preenchido com DATABASE_URL (pooler 6543) e DIRECT_URL (pooler 5432); `.env.local` com URL + chave publishable do Supabase e NEXTAUTH_SECRET gerado.
+- Schema aplicado com `npx prisma db push` (16 tabelas). Conexão de migrations (5432) e runtime (6543) testadas OK.
+- Falta apenas `SUPABASE_SERVICE_ROLE_KEY` (S03) e `RESEND_API_KEY` (S05).
+---
+
+## 2026-07-02 - S02 - Autenticação com email e senha
+- NextAuth v5 (beta) com provider de credenciais, sessão JWT, bcryptjs (10 rounds) e validação Zod.
+- Páginas `/login` e `/register` (grupo `app/(auth)/`) com react-hook-form + zodResolver e mensagens de erro amigáveis (inline).
+- Server Actions em `app/(auth)/actions.ts`: `registerUser` (cria usuário + auto-login) e `authenticate`.
+- `middleware.ts` protege rotas via callback `authorized`; redireciona não-logado para `/login?callbackUrl=...` e logado para `/dashboard` se tentar login/registro.
+- Área logada `app/(app)/` com layout (header + nome + botão Sair via `signOut`) e `/dashboard` placeholder (dashboard real = S16).
+- Componentes shadcn adicionados à mão: `input`, `label`, `card`.
+- **Files changed:** lib/auth.ts, lib/auth.config.ts, lib/validations/auth.ts, middleware.ts, types/next-auth.d.ts, app/api/auth/[...nextauth]/route.ts, app/(auth)/{layout,actions}.tsx|ts, app/(auth)/login/page.tsx, app/(auth)/register/page.tsx, app/(app)/layout.tsx, app/(app)/dashboard/page.tsx, components/auth/{login,register}-form.tsx, components/ui/{input,label,card}.tsx, package.json.
+- **Checks:** typecheck ✓, lint ✓, build ✓ (8 rotas, middleware 78.9 kB), format ✓.
+- **Verificação funcional (preview):** GET /login e /register = 200; GET /dashboard sem auth = 307 → /login. Registro real pela UI criou usuário no banco com senha em hash bcrypt, auto-login e redirect para /dashboard mostrando os dados da sessão. Usuário de teste removido depois.
+- **Learnings:** ver seção **Codebase Patterns** (bloco de Autenticação) — split edge/node do NextAuth v5, bcryptjs no Windows, e uso de `preview_snapshot` (screenshot dá timeout).
 ---
