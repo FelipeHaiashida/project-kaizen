@@ -190,3 +190,6 @@
 - `NotificationBell` no header (realtime via supabaseBrowser, badge de não lidas, dropdown, marcar lida/todas). `/settings/notifications` com toggles.
 - **Radix DropdownMenu abre no `pointerdown`** — no preview, disparar `PointerEvent('pointerdown')`+`pointerup`+`click` para abrir (o `.click()` puro não abre; o `preview_click` às vezes também não). Guardar isto.
 - **Estado stale no preview:** ao togglar um chip (setState) e clicar salvar no MESMO eval, o save usa estado velho (React ainda não re-renderizou). Fazer toggle e save em evals SEPARADOS.
+
+## S16 Dashboard
+- app/(app)/dashboard/page.tsx (server): resumo (concluídas 7d, em progresso, atrasadas), Vencendo hoje/Atrasadas em destaque, Minhas tarefas (ordenadas por vencimento), Atividade recente (últimos comentários do workspace), Projetos recentes. "Concluído" = status de maior order em cada projeto (doneStatusIds computado por projeto). Sem model de Activity — atividade derivada de comentários recentes.

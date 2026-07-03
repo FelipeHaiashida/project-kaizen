@@ -309,7 +309,7 @@
       "epic": "E7",
       "title": "Dashboard pessoal (Meu Trabalho)",
       "priority": 16,
-      "passes": false,
+      "passes": true,
       "description": "Página inicial com visão geral das tarefas do usuário logado.",
       "acceptanceCriteria": [
         "Página /dashboard como home após login",
