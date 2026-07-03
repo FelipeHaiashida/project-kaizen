@@ -9,6 +9,9 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
           <Link href="/settings/profile" className="font-medium text-primary hover:underline">
             Perfil
           </Link>
+          <Link href="/settings/workspace" className="font-medium text-primary hover:underline">
+            Workspace
+          </Link>
         </nav>
       </div>
       {children}

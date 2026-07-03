@@ -37,6 +37,12 @@
 - **Toasts:** `sonner`. `<Toaster richColors />` já está no root `app/layout.tsx`. Usar `toast.success/error` nos client components após Server Actions.
 - **JWT vs dados frescos:** a sessão JWT não reflete mudanças de nome/foto até relogar. Onde precisar de dados atuais (ex.: header em `app/(app)/layout.tsx`), buscar do banco por `session.user.id`. Após mutations, chamar `revalidatePath("/", "layout")` + `router.refresh()`.
 - **Upload por FormData + react-hook-form:** o RHF valida os campos de texto; no `onSubmit` monta-se um `FormData` manualmente (campos + File do input escondido) e chama-se a Server Action. Input `type=file` é escondido e acionado por um botão via `ref`.
+- **Multi-tenant / Workspaces:** o "workspace ativo" é guardado no cookie **`kaizen.ws`** (= slug). Helpers em `lib/workspace.ts`: `getActiveWorkspace()` (server: lê cookie, fallback pro 1º; retorna `{workspace, role, memberships}`), `getUserMemberships()`. Setar o cookie só em Server Action (`cookies().set`). Papéis: helper PURO em `lib/roles.ts` (`canManageWorkspaceRole`, `ROLE_LABELS`) — importável no client (o `lib/workspace.ts` é server-only).
+  - **Shell da área logada** (`app/(app)/layout.tsx`): sidebar com `WorkspaceSwitcher` + nav; **redireciona pra `/onboarding` se o usuário não tem workspace** (é assim que o onboarding "no primeiro login" é imposto). `/onboarding` fica em grupo próprio `app/(onboarding)/` (fora do shell) e sempre mostra o form de criar (serve também pra criar workspaces adicionais).
+  - Server Actions de workspace em `lib/actions/workspace.ts`: create/update/switch/removeMember/getInviteToken.
+  - **Storage genérico:** `lib/storage.ts` `uploadImage(bucket, path, file)` (reusa o admin client). Bucket `workspace-logos` (público) para logos.
+  - **Link de convite (S04):** `getInviteToken()` cria/reaproveita uma `Invitation` **aberta** (email=null) válida 7 dias e o client monta `${origin}/invite/${token}`. O model `Invitation.email` virou opcional pra suportar link aberto (S04) e convite por email (S05). A página `/invite/[token]` de aceite é da S05.
+- **Radix dropdown não abre com `.click()` sintético** no preview — usar `preview_click` (evento real) no trigger; depois os `[role=menuitem]` podem ser lidos/clicados via `preview_eval`. Para `window.confirm` em testes, sobrescrever `window.confirm = () => true` antes de clicar. Navegação no preview: `preview_eval` com `window.location.href=...` (não há tool de navigate).
 - **Singleton do Prisma:** importar `{ db }` de `lib/db.ts` (NÃO instanciar `new PrismaClient()` avulso).
 - **Tipos globais:** importar de `@/types` (reexporta models/enums do Prisma).
 - **Convenções:** arquivos em kebab-case, componentes em PascalCase. Rotas autenticadas em `/(app)/`, públicas `/login` `/register` `/invite/[token]`. Mutations via Server Actions. Validação com Zod.
@@ -95,4 +101,17 @@
 - **Checks:** typecheck ✓, lint ✓, build ✓ (9 rotas), format ✓.
 - **Verificação funcional (preview + DB):** registro/login OK; edição de nome+bio persistiu no banco e atualizou o header via revalidate ✓; troca de senha regrava o hash (senha antiga inválida, nova válida) ✓; upload ao Storage retorna URL pública com HTTP 200 ✓; fallback de iniciais renderiza ("AS"/"AL"). **Manual pendente:** o file picker do navegador não é acionável pelas ferramentas de preview — o caminho de Storage foi validado por script, mas selecionar/enviar uma imagem real pela UI convém testar manualmente.
 - **Learnings:** ver **Codebase Patterns** (blocos Supabase Storage, Toasts, JWT vs dados frescos, seletores de submit).
+---
+
+## 2026-07-03 - S04 - Criação e gestão de Workspace
+- Onboarding (`app/(onboarding)/onboarding`) com form de criar workspace (nome, slug auto-gerado/editável, logo opcional). O shell logado redireciona pra cá quem não tem workspace.
+- Shell da área logada reescrito com **sidebar** + `WorkspaceSwitcher` (dropdown Radix listando workspaces, trocar, criar novo, ir p/ configurações).
+- "Workspace ativo" via cookie `kaizen.ws`; helpers em `lib/workspace.ts` e roles puros em `lib/roles.ts`.
+- Página `/settings/workspace`: editar nome/slug/logo (Owner/Admin), lista de membros com papel, botão **copiar link de convite** (Owner/Admin) e **remover membro** (Owner).
+- Server Actions em `lib/actions/workspace.ts`; upload genérico em `lib/storage.ts`; bucket `workspace-logos` criado.
+- Schema: `Invitation.email` → opcional (link aberto vs email). `prisma db push` aplicado.
+- **Files changed:** prisma/schema.prisma, lib/{workspace,roles,storage}.ts, lib/actions/workspace.ts, lib/validations/workspace.ts, app/(app)/layout.tsx, app/(app)/settings/{layout.tsx,workspace/page.tsx}, app/(onboarding)/onboarding/page.tsx, components/ui/dropdown-menu.tsx, components/workspace/{create-workspace-form,workspace-switcher,workspace-settings-form,copy-invite-button,remove-member-button}.tsx, package.json.
+- **Checks:** typecheck ✓, lint ✓, build ✓ (11 rotas), format ✓.
+- **Verificação funcional (preview + DB):** registro → redirect p/ onboarding ✓; slug auto ("Time Kaizen"→"time-kaizen") ✓; criar workspace → OWNER membership no banco + redirect p/ dashboard com sidebar ✓; editar nome+slug persistiu (cookie atualizado) ✓; copiar convite cria Invitation aberta e reaproveita no 2º clique ✓; remover membro (Owner removeu Member) ✓; switcher lista 2 workspaces e troca ativa (cookie `kaizen.ws`) ✓. Dados de teste removidos ao final.
+- **Learnings:** ver **Codebase Patterns** (bloco Multi-tenant / Workspaces e o de Radix dropdown no preview).
 ---

@@ -26,6 +26,13 @@ Registrar aprendizados em `progress.txt` (ler a seção **Codebase Patterns** no
 - Rotas públicas: `/`, `/login`, `/register`, `/invite/*`. Todo o resto exige login (ver callback `authorized`). Área logada em `app/(app)/`.
 - Senhas com `bcryptjs`. Componentes shadcn: escrever à mão no estilo clássico (não usar `npx shadcn add`).
 
+## Workspaces (multi-tenant)
+
+- "Workspace ativo" = cookie `kaizen.ws` (slug). Em Server Component use `getActiveWorkspace()` de `@/lib/workspace` → `{ workspace, role, memberships }` (ou `null` se o usuário não tem workspace).
+- O shell logado (`app/(app)/layout.tsx`) redireciona pra `/onboarding` quem não tem workspace.
+- Papéis: use `canManageWorkspaceRole`/`ROLE_LABELS` de `@/lib/roles` (puro, ok no client). `lib/workspace.ts` é server-only.
+- Upload de imagem: `uploadImage(bucket, path, file)` de `@/lib/storage`. Buckets públicos: `avatars`, `workspace-logos`.
+
 ## Variáveis de ambiente
 
 - `.env` → `DATABASE_URL`, `DIRECT_URL` (**o Prisma CLI só lê `.env`**).

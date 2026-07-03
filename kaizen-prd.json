@@ -111,7 +111,7 @@
       "epic": "E2",
       "title": "Criação e gestão de Workspace",
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "description": "Usuário pode criar um workspace (empresa/equipe) e convidar membros.",
       "acceptanceCriteria": [
         "Onboarding após primeiro login para criar ou entrar em workspace",

@@ -1,33 +1,59 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { LayoutDashboard } from "lucide-react";
 
 import { auth, signOut } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getActiveWorkspace } from "@/lib/workspace";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
+import { WorkspaceSwitcher } from "@/components/workspace/workspace-switcher";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
+  if (!session?.user?.id) redirect("/login");
 
-  // Reforço à proteção do middleware (garante sessão nas Server Components filhas)
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
+  const active = await getActiveWorkspace();
+  if (!active) redirect("/onboarding");
 
-  // Busca dados frescos (nome/foto podem ter mudado após a sessão JWT ser emitida)
   const user = await db.user.findUnique({
     where: { id: session.user.id },
     select: { name: true, image: true },
   });
 
+  const workspaces = active.memberships.map((m) => ({
+    slug: m.workspace.slug,
+    name: m.workspace.name,
+    logo: m.workspace.logo,
+  }));
+
   return (
-    <div className="min-h-screen">
-      <header className="flex items-center justify-between border-b px-6 py-3">
-        <Link href="/dashboard" className="flex items-baseline gap-2">
-          <span className="text-lg font-bold tracking-tight">Kaizen</span>
-          <span className="text-xs text-primary">改善</span>
-        </Link>
-        <div className="flex items-center gap-3">
+    <div className="flex min-h-screen">
+      <aside className="flex w-64 flex-col border-r bg-muted/20">
+        <div className="p-3">
+          <WorkspaceSwitcher
+            active={{
+              slug: active.workspace.slug,
+              name: active.workspace.name,
+              logo: active.workspace.logo,
+            }}
+            workspaces={workspaces}
+            role={active.role}
+          />
+        </div>
+        <nav className="flex-1 space-y-1 px-3">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 rounded-md px-2 py-2 text-sm font-medium hover:bg-accent"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            Dashboard
+          </Link>
+        </nav>
+      </aside>
+
+      <div className="flex flex-1 flex-col">
+        <header className="flex items-center justify-end gap-3 border-b px-6 py-3">
           <Link
             href="/settings/profile"
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
@@ -45,9 +71,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               Sair
             </Button>
           </form>
-        </div>
-      </header>
-      <main className="p-6">{children}</main>
+        </header>
+        <main className="flex-1 p-6">{children}</main>
+      </div>
     </div>
   );
 }

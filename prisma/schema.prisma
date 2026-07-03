@@ -58,7 +58,7 @@ enum Role {
 
 model Invitation {
   id          String    @id @default(cuid())
-  email       String
+  email       String? // null = link de convite aberto (sem email específico)
   token       String    @unique @default(cuid())
   role        Role      @default(MEMBER)
   expiresAt   DateTime
