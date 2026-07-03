@@ -31,6 +31,12 @@
 - **Componentes shadcn adicionados à mão** (estilo clássico Radix v3): `input`, `label` (usa `@radix-ui/react-label`), `card`. Continuar escrevendo à mão em vez de `npx shadcn add`.
 - **Grupos de rota:** `app/(auth)/` (login/registro, layout centralizado) e `app/(app)/` (área logada, layout com header + logout, valida `auth()`). Route groups não afetam a URL.
 - **Verificação no preview:** `preview_screenshot` dá timeout neste ambiente, mas **`preview_snapshot` (árvore de acessibilidade) funciona** e é ótimo para verificar texto/estrutura. Fluxos podem ser testados com `preview_fill`/`preview_click` + checagem no banco via `node --env-file=.env`.
+  - **Cuidado com seletores de submit:** o header da área logada tem um `<form>` de logout com `button[type=submit]`. Um seletor genérico `form button[type=submit]` clica no "Sair" (primeiro do DOM). Use seletores escopados, ex.: `main form button[type=submit]` ou `form:has(#campo) button[type=submit]`.
+  - Sessão JWT persiste no cookie mesmo após deletar o usuário do banco — ao re-testar, faça **logout** (botão Sair) antes de registrar outro usuário.
+- **Supabase Storage:** cliente admin (service_role) em `lib/supabase/admin.ts` (tem `import "server-only"` — nunca importar no client). Bucket **`avatars`** (público) já criado. Upload em Server Action recebendo `FormData` (File → `Buffer.from(await file.arrayBuffer())`, `upsert:true`); URL pública via `getPublicUrl` + cache-buster `?v=Date.now()`.
+- **Toasts:** `sonner`. `<Toaster richColors />` já está no root `app/layout.tsx`. Usar `toast.success/error` nos client components após Server Actions.
+- **JWT vs dados frescos:** a sessão JWT não reflete mudanças de nome/foto até relogar. Onde precisar de dados atuais (ex.: header em `app/(app)/layout.tsx`), buscar do banco por `session.user.id`. Após mutations, chamar `revalidatePath("/", "layout")` + `router.refresh()`.
+- **Upload por FormData + react-hook-form:** o RHF valida os campos de texto; no `onSubmit` monta-se um `FormData` manualmente (campos + File do input escondido) e chama-se a Server Action. Input `type=file` é escondido e acionado por um botão via `ref`.
 - **Singleton do Prisma:** importar `{ db }` de `lib/db.ts` (NÃO instanciar `new PrismaClient()` avulso).
 - **Tipos globais:** importar de `@/types` (reexporta models/enums do Prisma).
 - **Convenções:** arquivos em kebab-case, componentes em PascalCase. Rotas autenticadas em `/(app)/`, públicas `/login` `/register` `/invite/[token]`. Mutations via Server Actions. Validação com Zod.
@@ -76,4 +82,17 @@
 - **Checks:** typecheck ✓, lint ✓, build ✓ (8 rotas, middleware 78.9 kB), format ✓.
 - **Verificação funcional (preview):** GET /login e /register = 200; GET /dashboard sem auth = 307 → /login. Registro real pela UI criou usuário no banco com senha em hash bcrypt, auto-login e redirect para /dashboard mostrando os dados da sessão. Usuário de teste removido depois.
 - **Learnings:** ver seção **Codebase Patterns** (bloco de Autenticação) — split edge/node do NextAuth v5, bcryptjs no Windows, e uso de `preview_snapshot` (screenshot dá timeout).
+---
+
+## 2026-07-03 - S03 - Perfil do usuário
+- Página `/settings/profile` (grupo `app/(app)/settings/`) com layout próprio + nav. Dois cards: Perfil e Senha.
+- **ProfileForm** (client): edita nome, email (com checagem de unicidade), bio e foto. Upload de avatar via `FormData` → Server Action → Supabase Storage (bucket `avatars`, público). Preview local com `URL.createObjectURL` antes de salvar.
+- **PasswordForm** (client): senha atual + nova + confirmação (Zod `.refine` para conferir). Server Action valida a atual com bcrypt e regrava o hash.
+- Avatar com **fallback de iniciais** (`components/user-avatar.tsx` + `getInitials`). Header da área logada agora mostra avatar + nome (dados frescos do banco) e linka para o perfil.
+- Toasts de sucesso/erro com `sonner` (`<Toaster>` no root layout).
+- Infra: `lib/supabase/admin.ts` (service_role, server-only), bucket `avatars` criado via script.
+- **Files changed:** app/layout.tsx, app/(app)/layout.tsx, app/(app)/settings/{layout.tsx,actions.ts}, app/(app)/settings/profile/page.tsx, components/settings/{profile,password}-form.tsx, components/user-avatar.tsx, components/ui/{avatar,textarea,sonner}.tsx, lib/supabase/admin.ts, lib/validations/profile.ts, package.json.
+- **Checks:** typecheck ✓, lint ✓, build ✓ (9 rotas), format ✓.
+- **Verificação funcional (preview + DB):** registro/login OK; edição de nome+bio persistiu no banco e atualizou o header via revalidate ✓; troca de senha regrava o hash (senha antiga inválida, nova válida) ✓; upload ao Storage retorna URL pública com HTTP 200 ✓; fallback de iniciais renderiza ("AS"/"AL"). **Manual pendente:** o file picker do navegador não é acionável pelas ferramentas de preview — o caminho de Storage foi validado por script, mas selecionar/enviar uma imagem real pela UI convém testar manualmente.
+- **Learnings:** ver **Codebase Patterns** (blocos Supabase Storage, Toasts, JWT vs dados frescos, seletores de submit).
 ---

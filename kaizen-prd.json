@@ -96,7 +96,7 @@
       "epic": "E1",
       "title": "Perfil do usuário",
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "description": "Página de perfil onde o usuário pode editar seus dados e foto.",
       "acceptanceCriteria": [
         "Página /settings/profile com campos: nome, email, bio, foto",
