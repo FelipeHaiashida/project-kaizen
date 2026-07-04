@@ -31,7 +31,7 @@ export function CopyInviteButton() {
   }
 
   return (
-    <Button type="button" variant="outline" size="sm" onClick={onClick} disabled={isPending}>
+    <Button type="button" size="sm" onClick={onClick} disabled={isPending}>
       <Copy className="h-4 w-4" />
       {copied ? "Copiado!" : "Copiar link de convite"}
     </Button>
