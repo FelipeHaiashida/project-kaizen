@@ -56,13 +56,13 @@ export function ListViewRow({
       </button>
 
       {columns.has("priority") && (
-        <span className="flex w-16 shrink-0 items-center gap-1 text-xs text-muted-foreground">
+        <span className="hidden w-16 shrink-0 items-center gap-1 text-xs text-muted-foreground sm:flex">
           <PriorityIcon priority={task.priority} />
           {PRIORITY_MAP[task.priority].label}
         </span>
       )}
       {columns.has("epic") && (
-        <span className="w-24 shrink-0 truncate text-xs">
+        <span className="hidden w-24 shrink-0 truncate text-xs lg:block">
           {task.epic ? (
             <span
               className="rounded-full px-1.5 py-0.5 text-[10px] font-medium text-white"
@@ -76,13 +76,13 @@ export function ListViewRow({
         </span>
       )}
       {columns.has("status") && (
-        <span className="flex w-28 shrink-0 items-center gap-1 text-xs">
+        <span className="hidden w-28 shrink-0 items-center gap-1 text-xs md:flex">
           <span className="h-2 w-2 rounded-full" style={{ backgroundColor: task.status.color }} />
           {task.status.name}
         </span>
       )}
       {columns.has("assignees") && (
-        <div className="flex w-16 shrink-0 -space-x-1.5">
+        <div className="hidden w-16 shrink-0 -space-x-1.5 sm:flex">
           {task.assignees.slice(0, 3).map((a) => (
             <UserAvatar
               key={a.id}
@@ -104,7 +104,7 @@ export function ListViewRow({
         </span>
       )}
       {columns.has("tags") && (
-        <div className="flex w-32 shrink-0 flex-wrap gap-1">
+        <div className="hidden w-32 shrink-0 flex-wrap gap-1 lg:flex">
           {task.tags.map((t) => (
             <span
               key={t.id}

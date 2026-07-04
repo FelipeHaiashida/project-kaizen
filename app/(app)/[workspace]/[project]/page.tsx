@@ -120,23 +120,25 @@ export default async function ProjectPage({
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <span
-          className="flex h-10 w-10 items-center justify-center rounded-md text-xl"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-xl"
           style={{ backgroundColor: `${project.color}20` }}
         >
           {project.icon}
         </span>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold tracking-tight">{project.name}</h1>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate font-brand text-xl font-bold tracking-tight sm:text-2xl">
+            {project.name}
+          </h1>
           {project.description && (
-            <p className="text-sm text-muted-foreground">{project.description}</p>
+            <p className="truncate text-sm text-muted-foreground">{project.description}</p>
           )}
         </div>
         <Link
           href={`/${params.workspace}/${params.project}/settings`}
-          className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+          className="flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           <Settings className="h-4 w-4" />
-          Configurações
+          <span className="hidden sm:inline">Configurações</span>
         </Link>
       </div>
 

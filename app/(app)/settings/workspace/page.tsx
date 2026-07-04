@@ -69,13 +69,13 @@ export default async function WorkspaceSettingsPage() {
       )}
 
       <Card>
-        <CardHeader className="flex-row items-center justify-between space-y-0">
+        <CardHeader className="flex-col gap-3 space-y-0 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1.5">
             <CardTitle className="text-xl">Membros</CardTitle>
             <CardDescription>{members.length} membro(s) neste workspace</CardDescription>
           </div>
           {canManage && (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <CopyInviteButton />
               <InviteMemberDialog />
             </div>

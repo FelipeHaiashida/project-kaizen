@@ -126,8 +126,8 @@ export function CalendarView({
   const openTask = openTaskId ? tasks.find((t) => t.id === openTaskId) : null;
 
   return (
-    <div className="flex gap-4">
-      <div className="flex-1">
+    <div className="flex flex-col gap-4 lg:flex-row">
+      <div className="min-w-0 flex-1">
         <div className="mb-3 flex items-center gap-2">
           <Button variant="outline" size="icon" onClick={prevMonth} aria-label="Mês anterior">
             <ChevronLeft className="h-4 w-4" />
@@ -189,7 +189,7 @@ export function CalendarView({
         </div>
       </div>
 
-      <aside className="w-56 shrink-0">
+      <aside className="w-full shrink-0 lg:w-56">
         <h3 className="mb-2 text-sm font-semibold">Sem data ({noDate.length})</h3>
         <div className="space-y-1">
           {noDate.map((t) => (

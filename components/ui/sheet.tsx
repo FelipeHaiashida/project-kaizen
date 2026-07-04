@@ -12,14 +12,20 @@ const SheetClose = DialogPrimitive.Close;
 
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+    side?: "left" | "right";
+  }
+>(({ className, children, side = "right", ...props }, ref) => (
   <DialogPrimitive.Portal>
     <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-y-0 right-0 z-50 flex h-full w-full max-w-md flex-col overflow-y-auto border-l bg-background p-6 shadow-lg transition data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
+        "fixed inset-y-0 z-50 flex h-full w-full max-w-md flex-col overflow-y-auto bg-background p-6 shadow-lg transition data-[state=open]:animate-in data-[state=closed]:animate-out",
+        side === "right" &&
+          "right-0 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
+        side === "left" &&
+          "left-0 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left",
         className
       )}
       {...props}

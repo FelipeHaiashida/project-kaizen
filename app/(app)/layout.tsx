@@ -7,11 +7,9 @@ import { getActiveWorkspace } from "@/lib/workspace";
 import { getWorkspaceProjects } from "@/lib/project";
 import { getUnreadAnnouncementCount } from "@/lib/actions/announcement";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/logo";
 import { UserAvatar } from "@/components/user-avatar";
-import { AppSidebarNav } from "@/components/app-sidebar-nav";
-import { WorkspaceSwitcher } from "@/components/workspace/workspace-switcher";
-import { ProjectsNav } from "@/components/project/projects-nav";
+import { SidebarContent } from "@/components/sidebar-content";
+import { MobileSidebar } from "@/components/mobile-sidebar";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { GlobalSearch } from "@/components/search/global-search";
 
@@ -36,42 +34,30 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const projects = await getWorkspaceProjects(active.workspace.id);
   const unreadAnnouncements = await getUnreadAnnouncementCount();
 
+  const sidebar = (
+    <SidebarContent
+      active={{
+        slug: active.workspace.slug,
+        name: active.workspace.name,
+        logo: active.workspace.logo,
+      }}
+      workspaces={workspaces}
+      role={active.role}
+      unreadAnnouncements={unreadAnnouncements}
+      projects={projects}
+      user={{ name: user?.name ?? session.user.name, image: user?.image }}
+    />
+  );
+
   return (
     <div className="flex min-h-screen">
-      <aside className="flex w-[248px] flex-col gap-3 bg-sidebar px-3 py-4 text-sidebar-foreground">
-        <div className="px-1.5 pb-1">
-          <Logo variant="light" markSize={30} textSize={17} />
-        </div>
-        <WorkspaceSwitcher
-          active={{
-            slug: active.workspace.slug,
-            name: active.workspace.name,
-            logo: active.workspace.logo,
-          }}
-          workspaces={workspaces}
-          role={active.role}
-        />
-        <AppSidebarNav unreadAnnouncements={unreadAnnouncements} />
-        <div className="flex-1 overflow-y-auto">
-          <ProjectsNav projects={projects} workspaceSlug={active.workspace.slug} />
-        </div>
-        <Link
-          href="/settings/profile"
-          className="flex items-center gap-2.5 rounded-[9px] px-2.5 py-2 transition-colors hover:bg-sidebar-accent"
-        >
-          <UserAvatar
-            name={user?.name}
-            image={user?.image}
-            className="h-[26px] w-[26px] text-[11px] [&_span]:bg-[hsl(var(--chip-mint))] [&_span]:text-sidebar"
-          />
-          <span className="truncate text-[12.5px] font-medium">
-            {user?.name ?? session.user.name}
-          </span>
-        </Link>
+      <aside className="hidden w-[248px] shrink-0 bg-sidebar text-sidebar-foreground lg:block">
+        {sidebar}
       </aside>
 
-      <div className="flex flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b bg-card/60 px-6 py-3">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex items-center gap-2 border-b bg-card/60 px-4 py-3 sm:gap-3 sm:px-6">
+          <MobileSidebar>{sidebar}</MobileSidebar>
           <GlobalSearch
             workspaceSlug={active.workspace.slug}
             projects={projects
@@ -85,7 +71,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
           >
             <UserAvatar name={user?.name} image={user?.image} className="h-7 w-7 text-xs" />
-            <span>{user?.name ?? session.user.name}</span>
+            <span className="hidden md:inline">{user?.name ?? session.user.name}</span>
           </Link>
           <form
             action={async () => {
@@ -98,7 +84,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </Button>
           </form>
         </header>
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 p-4 sm:p-6">{children}</main>
       </div>
     </div>
   );
