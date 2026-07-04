@@ -21,7 +21,38 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+/**
+ * Convite por email temporariamente desativado: sem domínio verificado no Resend,
+ * o email só chega ao dono da conta. Use "Copiar link de convite" nesse meio-tempo.
+ * Para reativar, basta mudar esta flag para `true`.
+ */
+const EMAIL_INVITES_ENABLED = false;
+
 export function InviteMemberDialog() {
+  if (!EMAIL_INVITES_ENABLED) {
+    return (
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        disabled
+        aria-disabled
+        title="Convite por email chega em breve — por ora, use o link de convite"
+        className="cursor-not-allowed"
+      >
+        <UserPlus className="h-4 w-4" />
+        Convidar por email
+        <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          Em breve
+        </span>
+      </Button>
+    );
+  }
+
+  return <InviteMemberDialogForm />;
+}
+
+function InviteMemberDialogForm() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
