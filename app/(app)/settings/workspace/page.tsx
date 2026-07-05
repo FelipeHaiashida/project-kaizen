@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { UserAvatar } from "@/components/user-avatar";
 import { WorkspaceSettingsForm } from "@/components/workspace/workspace-settings-form";
 import { CopyInviteButton } from "@/components/workspace/copy-invite-button";
-import { RemoveMemberButton } from "@/components/workspace/remove-member-button";
+import { MemberActions } from "@/components/workspace/member-actions";
 import { InviteMemberDialog } from "@/components/workspace/invite-member-dialog";
 import { RevokeInvitationButton } from "@/components/workspace/revoke-invitation-button";
 
@@ -85,7 +85,7 @@ export default async function WorkspaceSettingsPage() {
           <ul className="divide-y">
             {members.map((m) => {
               const isSelf = m.user.id === session.user.id;
-              const removable = isOwner && m.role !== "OWNER" && !isSelf;
+              const manageable = canManage && !isSelf && m.role !== "OWNER";
               return (
                 <li key={m.id} className="flex items-center gap-3 py-3">
                   <UserAvatar name={m.user.name} image={m.user.image} className="h-9 w-9" />
@@ -99,7 +99,14 @@ export default async function WorkspaceSettingsPage() {
                   <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">
                     {ROLE_LABELS[m.role]}
                   </span>
-                  {removable && <RemoveMemberButton memberId={m.id} memberName={m.user.name} />}
+                  {manageable && (
+                    <MemberActions
+                      memberId={m.id}
+                      memberName={m.user.name}
+                      memberRole={m.role as "ADMIN" | "MEMBER"}
+                      canRemove={isOwner}
+                    />
+                  )}
                 </li>
               );
             })}

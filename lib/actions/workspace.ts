@@ -165,6 +165,41 @@ export async function removeMember(memberId: string): Promise<ActionState> {
   return { success: "Membro removido" };
 }
 
+/**
+ * Altera o papel de um membro entre ADMIN e MEMBER (apenas Owner/Admin).
+ * Protege o Owner e impede que o usuário altere o próprio papel.
+ */
+export async function updateMemberRole(
+  memberId: string,
+  role: "ADMIN" | "MEMBER"
+): Promise<ActionState> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Não autenticado" };
+
+  const active = await getActiveWorkspace();
+  if (!active) return { error: "Nenhum workspace ativo" };
+  if (!canManageWorkspace(active.role)) return { error: "Sem permissão para alterar papéis" };
+
+  if (role !== "ADMIN" && role !== "MEMBER") return { error: "Papel inválido" };
+
+  const member = await db.workspaceMember.findUnique({
+    where: { id: memberId },
+    select: { id: true, role: true, workspaceId: true, userId: true },
+  });
+  if (!member || member.workspaceId !== active.workspace.id) {
+    return { error: "Membro não encontrado" };
+  }
+  if (member.role === "OWNER") return { error: "Não é possível alterar o papel do Owner" };
+  if (member.userId === session.user.id) return { error: "Você não pode alterar seu próprio papel" };
+  if (member.role === role) return { error: "O membro já tem esse papel" };
+
+  await db.workspaceMember.update({ where: { id: memberId }, data: { role } });
+  revalidatePath("/settings/workspace");
+  return {
+    success: role === "ADMIN" ? "Membro promovido a Admin" : "Admin rebaixado a Membro",
+  };
+}
+
 /** Gera (ou reaproveita) um link de convite aberto para o workspace ativo. Retorna o token. */
 export async function getInviteToken(): Promise<{ token: string } | { error: string }> {
   const session = await auth();
