@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Megaphone } from "lucide-react";
+import { LayoutDashboard, Megaphone, Settings } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/avisos", label: "Avisos", icon: Megaphone },
+  { href: "/settings", label: "Configurações", icon: Settings },
 ];
 
 export function AppSidebarNav({ unreadAnnouncements }: { unreadAnnouncements: number }) {
