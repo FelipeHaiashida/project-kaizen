@@ -12,7 +12,6 @@ import {
   toggleReaction,
   type CommentData,
 } from "@/lib/actions/comment";
-import { supabaseBrowser } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { UserAvatar } from "@/components/user-avatar";
@@ -48,19 +47,14 @@ export function TaskComments({
     setComments(data);
   }, [taskId]);
 
+  // Atualização quase em tempo real via polling leve (só com a aba visível).
+  // Substitui a antiga assinatura Realtime pela chave anon, agora bloqueada por RLS.
   useEffect(() => {
     load();
-    const channel = supabaseBrowser
-      .channel(`comments-${taskId}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "Comment", filter: `taskId=eq.${taskId}` },
-        () => load()
-      )
-      .subscribe();
-    return () => {
-      supabaseBrowser.removeChannel(channel);
-    };
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") load();
+    }, 20000);
+    return () => clearInterval(id);
   }, [taskId, load]);
 
   function add(html: string) {

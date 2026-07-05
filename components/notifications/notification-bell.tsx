@@ -11,7 +11,6 @@ import {
   markAllNotificationsRead,
   type NotificationItem,
 } from "@/lib/actions/notification";
-import { supabaseBrowser } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -38,19 +37,14 @@ export function NotificationBell({ userId }: { userId: string }) {
     setUnread(data.unread);
   }, []);
 
+  // Atualização quase em tempo real via polling leve (só com a aba visível).
+  // Substitui a antiga assinatura Realtime pela chave anon, agora bloqueada por RLS.
   useEffect(() => {
     load();
-    const channel = supabaseBrowser
-      .channel(`notif-${userId}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "Notification", filter: `userId=eq.${userId}` },
-        () => load()
-      )
-      .subscribe();
-    return () => {
-      supabaseBrowser.removeChannel(channel);
-    };
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") load();
+    }, 20000);
+    return () => clearInterval(id);
   }, [userId, load]);
 
   function openItem(n: NotificationItem) {
