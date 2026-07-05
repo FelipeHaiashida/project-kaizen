@@ -6,9 +6,11 @@ import { CheckCircle2, Clock, AlertTriangle } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getActiveWorkspace } from "@/lib/workspace";
+import { canManageWorkspaceRole } from "@/lib/roles";
 import { PRIORITY_MAP } from "@/lib/tasks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserAvatar } from "@/components/user-avatar";
+import { DashboardBanner } from "@/components/dashboard-banner";
 import { PriorityIcon } from "@/components/task/priority-icon";
 
 export const metadata: Metadata = {
@@ -108,6 +110,11 @@ export default async function DashboardPage() {
           Seu resumo no workspace {active.workspace.name}
         </p>
       </div>
+
+      <DashboardBanner
+        bannerImage={active.workspace.bannerImage}
+        canEdit={canManageWorkspaceRole(active.role)}
+      />
 
       <div className="grid gap-4 sm:grid-cols-3">
         {summaryCards.map((c) => {

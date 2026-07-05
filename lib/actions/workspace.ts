@@ -98,6 +98,42 @@ export async function updateWorkspace(formData: FormData): Promise<ActionState> 
   return { success: "Workspace atualizado" };
 }
 
+/** Define a imagem do banner do dashboard (apenas Owner/Admin). */
+export async function updateWorkspaceBanner(formData: FormData): Promise<ActionState> {
+  const active = await getActiveWorkspace();
+  if (!active) return { error: "Nenhum workspace ativo" };
+  if (!canManageWorkspace(active.role)) return { error: "Sem permissão para editar o banner" };
+
+  const file = formData.get("banner");
+  if (!(file instanceof File) || file.size === 0) return { error: "Nenhuma imagem enviada" };
+
+  const result = await uploadImage("workspace-logos", `${active.workspace.slug}/banner`, file);
+  if ("error" in result) return { error: result.error };
+
+  await db.workspace.update({
+    where: { id: active.workspace.id },
+    data: { bannerImage: result.url },
+  });
+
+  revalidatePath("/dashboard");
+  return { success: "Banner atualizado" };
+}
+
+/** Remove a imagem do banner do dashboard (apenas Owner/Admin). */
+export async function removeWorkspaceBanner(): Promise<ActionState> {
+  const active = await getActiveWorkspace();
+  if (!active) return { error: "Nenhum workspace ativo" };
+  if (!canManageWorkspace(active.role)) return { error: "Sem permissão para editar o banner" };
+
+  await db.workspace.update({
+    where: { id: active.workspace.id },
+    data: { bannerImage: null },
+  });
+
+  revalidatePath("/dashboard");
+  return { success: "Banner removido" };
+}
+
 /** Troca o workspace ativo (valida que o usuário é membro). */
 export async function switchWorkspace(slug: string): Promise<void> {
   const session = await auth();

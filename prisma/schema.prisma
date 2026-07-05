@@ -43,6 +43,7 @@ model Workspace {
   name        String
   slug        String            @unique
   logo        String?
+  bannerImage String?
   createdAt   DateTime          @default(now())
   members     WorkspaceMember[]
   projects    Project[]
