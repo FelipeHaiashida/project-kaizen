@@ -103,8 +103,8 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div>
+    <div className="mx-auto flex max-w-5xl flex-col gap-4 lg:h-full lg:min-h-0">
+      <div className="shrink-0">
         <h1 className="font-brand text-2xl font-bold tracking-tight">Olá, {firstName} 👋</h1>
         <p className="text-sm text-muted-foreground">
           Seu resumo no workspace {active.workspace.name}
@@ -114,9 +114,10 @@ export default async function DashboardPage() {
       <DashboardBanner
         bannerImage={active.workspace.bannerImage}
         canEdit={canManageWorkspaceRole(active.role)}
+        className="lg:h-[120px]"
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid shrink-0 gap-4 sm:grid-cols-3">
         {summaryCards.map((c) => {
           const Icon = c.icon;
           return (
@@ -139,7 +140,7 @@ export default async function DashboardPage() {
       </div>
 
       {(dueToday.length > 0 || overdue.length > 0) && (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid shrink-0 gap-4 sm:grid-cols-2">
           <HighlightList
             title="Vencendo hoje"
             tasks={dueToday}
@@ -157,67 +158,40 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Minhas tarefas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {myTasks.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhuma tarefa atribuída a você. 🎉</p>
-          ) : (
-            <ul className="divide-y">
-              {myTasks.slice(0, 12).map((t) => (
-                <li key={t.id}>
-                  <Link
-                    href={`/${slug}/${t.list.project.id}`}
-                    className="flex items-center gap-2 py-2 text-sm hover:text-primary"
-                  >
-                    <PriorityIcon priority={t.priority} />
-                    <span className="min-w-0 flex-1 truncate">{t.title}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {t.list.project.icon} {t.list.project.name}
-                    </span>
-                    {t.dueDate && (
-                      <span
-                        className={`w-12 text-right text-xs ${
-                          t.dueDate < todayStart
-                            ? "font-medium text-destructive"
-                            : "text-muted-foreground"
-                        }`}
-                      >
-                        {fmtDate(t.dueDate)}
-                      </span>
-                    )}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Atividade recente</CardTitle>
+      {/* Região inferior: preenche a altura restante; listas rolam internamente. */}
+      <div className="grid gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-3">
+        <Card className="flex flex-col lg:col-span-2 lg:min-h-0">
+          <CardHeader className="shrink-0 p-4 pb-2">
+            <CardTitle className="text-lg">Minhas tarefas</CardTitle>
           </CardHeader>
-          <CardContent>
-            {recentComments.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Sem atividade recente.</p>
+          <CardContent className="p-4 pt-0 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+            {myTasks.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhuma tarefa atribuída a você. 🎉</p>
             ) : (
-              <ul className="space-y-3">
-                {recentComments.map((c) => (
-                  <li key={c.id} className="flex items-center gap-2 text-sm">
-                    <UserAvatar
-                      name={c.user.name}
-                      image={c.user.image}
-                      className="h-6 w-6 text-[10px]"
-                    />
-                    <span className="min-w-0 flex-1 truncate">
-                      <span className="font-medium">{c.user.name}</span> comentou em{" "}
-                      <span className="text-muted-foreground">{c.task.title}</span>
-                    </span>
-                    <span className="text-xs text-muted-foreground">{fmtDate(c.createdAt)}</span>
+              <ul className="divide-y">
+                {myTasks.map((t) => (
+                  <li key={t.id}>
+                    <Link
+                      href={`/${slug}/${t.list.project.id}`}
+                      className="flex items-center gap-2 py-2 text-sm hover:text-primary"
+                    >
+                      <PriorityIcon priority={t.priority} />
+                      <span className="min-w-0 flex-1 truncate">{t.title}</span>
+                      <span className="hidden text-xs text-muted-foreground sm:inline">
+                        {t.list.project.icon} {t.list.project.name}
+                      </span>
+                      {t.dueDate && (
+                        <span
+                          className={`w-12 text-right text-xs ${
+                            t.dueDate < todayStart
+                              ? "font-medium text-destructive"
+                              : "text-muted-foreground"
+                          }`}
+                        >
+                          {fmtDate(t.dueDate)}
+                        </span>
+                      )}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -225,34 +199,64 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Projetos recentes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {recentProjects.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nenhum projeto ainda.</p>
-            ) : (
-              <div className="grid grid-cols-2 gap-2">
-                {recentProjects.map((p) => (
-                  <Link
-                    key={p.id}
-                    href={`/${slug}/${p.id}`}
-                    className="flex items-center gap-2 rounded-md border p-2 text-sm hover:bg-accent"
-                  >
-                    <span
-                      className="flex h-7 w-7 items-center justify-center rounded"
-                      style={{ backgroundColor: `${p.color}20` }}
+        <div className="flex flex-col gap-4 lg:min-h-0">
+          <Card className="flex flex-col lg:min-h-0 lg:flex-1">
+            <CardHeader className="shrink-0 p-4 pb-2">
+              <CardTitle className="text-lg">Atividade recente</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 pt-0 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+              {recentComments.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Sem atividade recente.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {recentComments.map((c) => (
+                    <li key={c.id} className="flex items-center gap-2 text-sm">
+                      <UserAvatar
+                        name={c.user.name}
+                        image={c.user.image}
+                        className="h-6 w-6 text-[10px]"
+                      />
+                      <span className="min-w-0 flex-1 truncate">
+                        <span className="font-medium">{c.user.name}</span> comentou em{" "}
+                        <span className="text-muted-foreground">{c.task.title}</span>
+                      </span>
+                      <span className="text-xs text-muted-foreground">{fmtDate(c.createdAt)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="flex flex-col lg:min-h-0 lg:flex-1">
+            <CardHeader className="shrink-0 p-4 pb-2">
+              <CardTitle className="text-lg">Projetos recentes</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 pt-0 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+              {recentProjects.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhum projeto ainda.</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {recentProjects.map((p) => (
+                    <Link
+                      key={p.id}
+                      href={`/${slug}/${p.id}`}
+                      className="flex items-center gap-2 rounded-md border p-2 text-sm hover:bg-accent"
                     >
-                      {p.icon}
-                    </span>
-                    <span className="truncate">{p.name}</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                      <span
+                        className="flex h-7 w-7 items-center justify-center rounded"
+                        style={{ backgroundColor: `${p.color}20` }}
+                      >
+                        {p.icon}
+                      </span>
+                      <span className="truncate">{p.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

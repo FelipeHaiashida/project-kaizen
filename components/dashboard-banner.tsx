@@ -14,9 +14,11 @@ const SCRIM = "linear-gradient(to top,rgba(31,38,26,.78),rgba(31,38,26,0))";
 export function DashboardBanner({
   bannerImage,
   canEdit,
+  className,
 }: {
   bannerImage: string | null;
   canEdit: boolean;
+  className?: string;
 }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -86,9 +88,10 @@ export function DashboardBanner({
           : undefined
       }
       className={cn(
-        "group relative h-[150px] overflow-hidden rounded-[18px]",
+        "group relative h-[150px] shrink-0 overflow-hidden rounded-[18px]",
         dragOver && "ring-2 ring-[#c96442] ring-offset-2 ring-offset-background",
-        canEdit && !hasImage && "cursor-pointer"
+        canEdit && !hasImage && "cursor-pointer",
+        className
       )}
       style={{ background: GRADIENT }}
     >

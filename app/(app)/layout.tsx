@@ -50,7 +50,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   );
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       <aside className="hidden w-[248px] shrink-0 bg-sidebar text-sidebar-foreground lg:block">
         {sidebar}
       </aside>
@@ -84,7 +84,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </Button>
           </form>
         </header>
-        <main className="flex-1 p-4 sm:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
       </div>
     </div>
   );
