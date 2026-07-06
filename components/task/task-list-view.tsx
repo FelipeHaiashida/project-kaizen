@@ -392,7 +392,11 @@ export function TaskListView({
     <div className="space-y-3">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
-        <TaskCreateDialog lists={lists} defaultListId={firstListId} />
+        <TaskCreateDialog
+          lists={lists}
+          defaultListId={firstListId}
+          onCreated={(id) => setOpenTaskId(id)}
+        />
         <div className="mx-1 hidden h-6 w-px bg-border sm:block" />
 
         <div className="relative">

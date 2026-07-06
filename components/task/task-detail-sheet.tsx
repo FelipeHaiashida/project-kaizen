@@ -13,7 +13,7 @@ import { setTaskEpic, createEpic } from "@/lib/actions/epic";
 import { EPIC_COLORS } from "@/lib/validations/epic";
 import { PRIORITIES } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -176,8 +176,9 @@ export function TaskDetailSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="gap-4">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="flex max-h-[88vh] max-w-2xl flex-col gap-4 overflow-y-auto">
+        <DialogTitle className="sr-only">Detalhes da tarefa</DialogTitle>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -434,7 +435,7 @@ export function TaskDetailSheet({
             {isPending ? "Salvando..." : "Salvar"}
           </Button>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -28,11 +28,14 @@ export function TaskCreateDialog({
   defaultListId,
   triggerLabel = "Nova tarefa",
   triggerClassName,
+  onCreated,
 }: {
   lists: ListRef[];
   defaultListId?: string;
   triggerLabel?: string;
   triggerClassName?: string;
+  /** Chamado com o id da tarefa recém-criada (ex.: para abrir o detalhamento). */
+  onCreated?: (taskId: string) => void;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -56,6 +59,7 @@ export function TaskCreateDialog({
         setTitle("");
         setOpen(false);
         router.refresh();
+        if (r.taskId) onCreated?.(r.taskId);
       }
     });
   }
