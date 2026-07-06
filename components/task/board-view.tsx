@@ -38,6 +38,7 @@ import type {
   MemberOption,
   TagRef,
   EpicRef,
+  SprintRef,
   ProjectField,
   ListRef,
 } from "@/components/task/types";
@@ -67,10 +68,18 @@ function BoardCard({
       <p className="mb-1 line-clamp-2">{task.title}</p>
       {task.epic && (
         <span
-          className="mb-1 inline-block rounded-full px-1.5 py-0.5 text-[10px] font-medium text-white"
+          className="mb-1 mr-1 inline-block rounded-full px-1.5 py-0.5 text-[10px] font-medium text-white"
           style={{ backgroundColor: task.epic.color }}
         >
           {task.epic.name}
+        </span>
+      )}
+      {task.sprint && (
+        <span
+          className="mb-1 inline-block rounded-full px-1.5 py-0.5 text-[10px] font-medium text-white"
+          style={{ backgroundColor: task.sprint.color }}
+        >
+          {task.sprint.name}
         </span>
       )}
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -174,6 +183,7 @@ export function BoardView({
   members,
   projectTags,
   projectEpics,
+  projectSprints,
   projectFields,
   currentUserId,
 }: {
@@ -184,6 +194,7 @@ export function BoardView({
   members: MemberOption[];
   projectTags: TagRef[];
   projectEpics: EpicRef[];
+  projectSprints: SprintRef[];
   projectFields: ProjectField[];
   currentUserId: string;
 }) {
@@ -192,6 +203,7 @@ export function BoardView({
   const [fPriority, setFPriority] = useState("");
   const [fTag, setFTag] = useState("");
   const [fEpic, setFEpic] = useState("");
+  const [fSprint, setFSprint] = useState("");
   const [openTaskId, setOpenTaskId] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -207,10 +219,11 @@ export function BoardView({
         if (fPriority && t.priority !== fPriority) return false;
         if (fTag && !t.tags.some((tg) => tg.id === fTag)) return false;
         if (fEpic && t.epic?.id !== fEpic) return false;
+        if (fSprint && t.sprint?.id !== fSprint) return false;
         return true;
       })
       .sort((a, b) => a.title.localeCompare(b.title));
-  }, [tasks, fAssignee, fPriority, fTag, fEpic]);
+  }, [tasks, fAssignee, fPriority, fTag, fEpic, fSprint]);
 
   const buildItems = () => {
     const map: Record<string, string[]> = {};
@@ -363,6 +376,20 @@ export function BoardView({
             ))}
           </select>
         )}
+        {projectSprints.length > 0 && (
+          <select
+            value={fSprint}
+            onChange={(e) => setFSprint(e.target.value)}
+            className={selectClass}
+          >
+            <option value="">Toda sprint</option>
+            {projectSprints.map((sp) => (
+              <option key={sp.id} value={sp.id}>
+                {sp.name}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       <DndContext
@@ -395,6 +422,7 @@ export function BoardView({
           members={members}
           projectTags={projectTags}
           projectEpics={projectEpics}
+          projectSprints={projectSprints}
           projectFields={projectFields}
           projectId={projectId}
           currentUserId={currentUserId}

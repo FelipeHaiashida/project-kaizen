@@ -19,6 +19,7 @@ import type {
   MemberOption,
   TagRef,
   EpicRef,
+  SprintRef,
   ProjectField,
   ListRef,
 } from "@/components/task/types";
@@ -54,6 +55,7 @@ export function CalendarView({
   members,
   projectTags,
   projectEpics,
+  projectSprints,
   projectFields,
   currentUserId,
 }: {
@@ -64,6 +66,7 @@ export function CalendarView({
   members: MemberOption[];
   projectTags: TagRef[];
   projectEpics: EpicRef[];
+  projectSprints: SprintRef[];
   projectFields: ProjectField[];
   currentUserId: string;
 }) {
@@ -248,6 +251,7 @@ export function CalendarView({
           members={members}
           projectTags={projectTags}
           projectEpics={projectEpics}
+          projectSprints={projectSprints}
           projectFields={projectFields}
           projectId={projectId}
           currentUserId={currentUserId}

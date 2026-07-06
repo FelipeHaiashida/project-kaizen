@@ -13,6 +13,7 @@ import type {
   MemberOption,
   TagRef,
   EpicRef,
+  SprintRef,
   ProjectField,
   ListRef,
 } from "@/components/task/types";
@@ -27,6 +28,7 @@ export interface ProjectViewsProps {
   members: MemberOption[];
   projectTags: TagRef[];
   projectEpics: EpicRef[];
+  projectSprints: SprintRef[];
   projectFields: ProjectField[];
   currentUserId: string;
 }

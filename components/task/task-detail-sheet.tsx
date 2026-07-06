@@ -10,7 +10,9 @@ import { updateTask, deleteTask, createTask, setTaskStatus } from "@/lib/actions
 import { setTaskTags } from "@/lib/actions/tag";
 import { setTaskFieldValue, setTaskEstimate } from "@/lib/actions/custom-field";
 import { setTaskEpic, createEpic } from "@/lib/actions/epic";
+import { setTaskSprint, createSprint } from "@/lib/actions/sprint";
 import { EPIC_COLORS } from "@/lib/validations/epic";
+import { SPRINT_COLORS } from "@/lib/validations/sprint";
 import { PRIORITIES } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -27,6 +29,7 @@ import type {
   MemberOption,
   TagRef,
   EpicRef,
+  SprintRef,
   ProjectField,
 } from "@/components/task/types";
 
@@ -40,6 +43,7 @@ export function TaskDetailSheet({
   members,
   projectTags,
   projectEpics,
+  projectSprints,
   projectFields,
   projectId,
   currentUserId,
@@ -52,6 +56,7 @@ export function TaskDetailSheet({
   members: MemberOption[];
   projectTags: TagRef[];
   projectEpics: EpicRef[];
+  projectSprints: SprintRef[];
   projectFields: ProjectField[];
   projectId: string;
   currentUserId: string;
@@ -71,6 +76,9 @@ export function TaskDetailSheet({
   const [epicId, setEpicId] = useState<string>(task.epic?.id ?? "");
   const [creatingEpic, setCreatingEpic] = useState(false);
   const [newEpicName, setNewEpicName] = useState("");
+  const [sprintId, setSprintId] = useState<string>(task.sprint?.id ?? "");
+  const [creatingSprint, setCreatingSprint] = useState(false);
+  const [newSprintName, setNewSprintName] = useState("");
   const [estimate, setEstimate] = useState(
     task.estimateHours != null ? String(task.estimateHours) : ""
   );
@@ -106,6 +114,7 @@ export function TaskDetailSheet({
       }
       await setTaskTags(task.id, tagIds);
       await setTaskEpic(task.id, epicId || null);
+      await setTaskSprint(task.id, sprintId || null);
       await setTaskEstimate(task.id, estimate.trim() === "" ? null : Number(estimate));
       for (const field of projectFields) {
         await setTaskFieldValue(task.id, field.id, fieldValues[field.id] ?? null);
@@ -129,6 +138,24 @@ export function TaskDetailSheet({
       setNewEpicName("");
       setCreatingEpic(false);
       toast.success("Épico criado");
+      router.refresh();
+    });
+  }
+
+  function addSprint() {
+    const name = newSprintName.trim();
+    if (!name) return;
+    const color = SPRINT_COLORS[Math.floor(name.length % SPRINT_COLORS.length)];
+    startTransition(async () => {
+      const r = await createSprint(projectId, { name, color });
+      if (r.error) {
+        toast.error(r.error);
+        return;
+      }
+      if (r.sprintId) setSprintId(r.sprintId);
+      setNewSprintName("");
+      setCreatingSprint(false);
+      toast.success("Sprint criada");
       router.refresh();
     });
   }
@@ -294,6 +321,60 @@ export function TaskDetailSheet({
                 onClick={() => setCreatingEpic(true)}
               >
                 + Novo
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">Sprint</Label>
+          {creatingSprint ? (
+            <div className="flex gap-2">
+              <Input
+                value={newSprintName}
+                onChange={(e) => setNewSprintName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addSprint();
+                  }
+                }}
+                placeholder="Nome da nova sprint"
+                autoFocus
+              />
+              <Button type="button" size="sm" onClick={addSprint} disabled={isPending}>
+                Criar
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setCreatingSprint(false)}
+              >
+                Cancelar
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <select
+                className={selectClass}
+                value={sprintId}
+                onChange={(e) => setSprintId(e.target.value)}
+              >
+                <option value="">Nenhuma</option>
+                {projectSprints.map((sp) => (
+                  <option key={sp.id} value={sp.id}>
+                    {sp.name}
+                  </option>
+                ))}
+              </select>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setCreatingSprint(true)}
+              >
+                + Nova
               </Button>
             </div>
           )}

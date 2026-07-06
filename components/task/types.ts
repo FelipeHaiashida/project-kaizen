@@ -6,6 +6,7 @@ export type MemberOption = { id: string; name: string; image: string | null };
 
 export type TagRef = { id: string; name: string; color: string };
 export type EpicRef = { id: string; name: string; color: string };
+export type SprintRef = { id: string; name: string; color: string };
 export type ProjectField = { id: string; name: string; type: string; options: string[] };
 export type TaskFieldValue = { fieldId: string; value: string };
 
@@ -35,6 +36,7 @@ export type TaskListItem = {
   assignees: TaskAssignee[];
   tags: TagRef[];
   epic: EpicRef | null;
+  sprint: SprintRef | null;
   fieldValues: TaskFieldValue[];
   attachments: AttachmentItem[];
   subtasks: SubtaskItem[];
@@ -44,4 +46,11 @@ export type TaskListItem = {
 export type TaskViewItem = TaskListItem & { listId: string; listName: string };
 
 export type ListRef = { id: string; name: string; color: string };
-export type ColumnKey = "status" | "assignees" | "dueDate" | "priority" | "tags" | "epic";
+export type ColumnKey =
+  | "status"
+  | "assignees"
+  | "dueDate"
+  | "priority"
+  | "tags"
+  | "epic"
+  | "sprint";

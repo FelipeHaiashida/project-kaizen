@@ -35,6 +35,7 @@ export default async function ProjectPage({
       statuses: { orderBy: { order: "asc" }, select: { id: true, name: true, color: true } },
       tags: { orderBy: { name: "asc" }, select: { id: true, name: true, color: true } },
       epics: { orderBy: { name: "asc" }, select: { id: true, name: true, color: true } },
+      sprints: { orderBy: { name: "asc" }, select: { id: true, name: true, color: true } },
       customFields: {
         orderBy: { order: "asc" },
         select: { id: true, name: true, type: true, options: true },
@@ -58,6 +59,7 @@ export default async function ProjectPage({
               statusId: true,
               status: { select: { name: true, color: true } },
               epic: { select: { id: true, name: true, color: true } },
+              sprint: { select: { id: true, name: true, color: true } },
               assignees: { select: { user: { select: { id: true, name: true, image: true } } } },
               tags: { select: { tag: { select: { id: true, name: true, color: true } } } },
               fieldValues: { select: { fieldId: true, value: true } },
@@ -85,6 +87,7 @@ export default async function ProjectPage({
   const statuses = project.statuses;
   const projectTags = project.tags;
   const projectEpics = project.epics;
+  const projectSprints = project.sprints;
   const projectFields = project.customFields;
 
   const lists = project.lists.map((l) => ({ id: l.id, name: l.name, color: l.color }));
@@ -102,6 +105,7 @@ export default async function ProjectPage({
       assignees: t.assignees.map((a) => a.user),
       tags: t.tags.map((tt) => tt.tag),
       epic: t.epic,
+      sprint: t.sprint,
       fieldValues: t.fieldValues,
       attachments: t.attachments.map((a) => ({
         id: a.id,
@@ -150,6 +154,7 @@ export default async function ProjectPage({
         members={members}
         projectTags={projectTags}
         projectEpics={projectEpics}
+        projectSprints={projectSprints}
         projectFields={projectFields}
         currentUserId={session.user.id}
       />

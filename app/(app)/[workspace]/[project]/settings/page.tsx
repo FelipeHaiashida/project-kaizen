@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { TagManager } from "@/components/project/tag-manager";
 import { CustomFieldManager } from "@/components/project/custom-field-manager";
 import { EpicManager } from "@/components/project/epic-manager";
+import { SprintManager } from "@/components/project/sprint-manager";
 import { StatusManager } from "@/components/project/status-manager";
 
 export const metadata: Metadata = {
@@ -38,6 +39,7 @@ export default async function ProjectSettingsPage({
         select: { id: true, name: true, type: true, options: true },
       },
       epics: { orderBy: { name: "asc" }, select: { id: true, name: true, color: true } },
+      sprints: { orderBy: { name: "asc" }, select: { id: true, name: true, color: true } },
     },
   });
   if (!project) notFound();
@@ -76,6 +78,18 @@ export default async function ProjectSettingsPage({
         </CardHeader>
         <CardContent>
           <EpicManager projectId={project.id} epics={project.epics} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Sprints</CardTitle>
+          <CardDescription>
+            Ciclos de trabalho para separar tarefas por sprint (uma sprint por tarefa)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SprintManager projectId={project.id} sprints={project.sprints} />
         </CardContent>
       </Card>
 

@@ -54,6 +54,7 @@ import type {
   MemberOption,
   TagRef,
   EpicRef,
+  SprintRef,
   ProjectField,
   ListRef,
   ColumnKey,
@@ -63,6 +64,7 @@ const PRIORITY_RANK: Record<Priority, number> = { URGENT: 0, HIGH: 1, NORMAL: 2,
 const ALL_COLUMNS: { key: ColumnKey; label: string }[] = [
   { key: "priority", label: "Prioridade" },
   { key: "epic", label: "Épico" },
+  { key: "sprint", label: "Sprint" },
   { key: "status", label: "Status" },
   { key: "assignees", label: "Responsável" },
   { key: "dueDate", label: "Vencimento" },
@@ -187,6 +189,7 @@ export function TaskListView({
   members,
   projectTags,
   projectEpics,
+  projectSprints,
   projectFields,
   currentUserId,
 }: {
@@ -197,6 +200,7 @@ export function TaskListView({
   members: MemberOption[];
   projectTags: TagRef[];
   projectEpics: EpicRef[];
+  projectSprints: SprintRef[];
   projectFields: ProjectField[];
   currentUserId: string;
 }) {
@@ -209,6 +213,7 @@ export function TaskListView({
   const [fPriority, setFPriority] = useState("");
   const [fStatus, setFStatus] = useState("");
   const [fEpic, setFEpic] = useState("");
+  const [fSprint, setFSprint] = useState("");
   const [fDue, setFDue] = useState("");
   const [columns, setColumns] = useState<Set<ColumnKey>>(new Set(ALL_COLUMNS.map((c) => c.key)));
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -233,13 +238,14 @@ export function TaskListView({
       if (fPriority && t.priority !== fPriority) return false;
       if (fStatus && t.statusId !== fStatus) return false;
       if (fEpic && t.epic?.id !== fEpic) return false;
+      if (fSprint && t.sprint?.id !== fSprint) return false;
       if (fDue === "has" && !t.dueDate) return false;
       if (fDue === "overdue") {
         if (!t.dueDate || new Date(t.dueDate) >= now || t.statusId === doneStatusId) return false;
       }
       return true;
     });
-  }, [tasks, search, fAssignee, fPriority, fStatus, fEpic, fDue, doneStatusId]);
+  }, [tasks, search, fAssignee, fPriority, fStatus, fEpic, fSprint, fDue, doneStatusId]);
 
   const sorted = useMemo(() => {
     const arr = [...filtered];
@@ -470,6 +476,20 @@ export function TaskListView({
             ))}
           </select>
         )}
+        {projectSprints.length > 0 && (
+          <select
+            value={fSprint}
+            onChange={(e) => setFSprint(e.target.value)}
+            className={selectClass}
+          >
+            <option value="">Toda sprint</option>
+            {projectSprints.map((sp) => (
+              <option key={sp.id} value={sp.id}>
+                {sp.name}
+              </option>
+            ))}
+          </select>
+        )}
         <select value={fDue} onChange={(e) => setFDue(e.target.value)} className={selectClass}>
           <option value="">Todo vencimento</option>
           <option value="has">Com data</option>
@@ -605,6 +625,7 @@ export function TaskListView({
           members={members}
           projectTags={projectTags}
           projectEpics={projectEpics}
+          projectSprints={projectSprints}
           projectFields={projectFields}
           projectId={projectId}
           currentUserId={currentUserId}
