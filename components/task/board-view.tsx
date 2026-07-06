@@ -30,6 +30,7 @@ import { PRIORITY_MAP, PRIORITIES } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/user-avatar";
 import { PriorityIcon } from "@/components/task/priority-icon";
+import { TaskCreateDialog } from "@/components/task/task-create-dialog";
 import { TaskDetailSheet } from "@/components/task/task-detail-sheet";
 import type {
   TaskViewItem,
@@ -314,6 +315,8 @@ export function BoardView({
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
+        <TaskCreateDialog lists={lists} defaultListId={firstListId} />
+        <div className="mx-1 hidden h-6 w-px bg-border sm:block" />
         <select
           value={fAssignee}
           onChange={(e) => setFAssignee(e.target.value)}

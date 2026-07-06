@@ -46,6 +46,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ListFormDialog } from "@/components/list/list-form-dialog";
 import { ListViewRow } from "@/components/task/list-view-row";
+import { TaskCreateDialog } from "@/components/task/task-create-dialog";
 import { TaskDetailSheet } from "@/components/task/task-detail-sheet";
 import type {
   TaskViewItem,
@@ -73,8 +74,8 @@ const selectClass =
 function InlineCreate({ onCreate }: { onCreate: (title: string) => void }) {
   const [title, setTitle] = useState("");
   return (
-    <div className="flex items-center gap-1 border-t px-2 py-1.5">
-      <Plus className="h-4 w-4 text-muted-foreground" />
+    <div className="flex items-center gap-1.5 border-t px-2 py-1.5 transition-colors focus-within:bg-accent/40 hover:bg-accent/40">
+      <Plus className="h-4 w-4 text-primary" />
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -85,8 +86,8 @@ function InlineCreate({ onCreate }: { onCreate: (title: string) => void }) {
             setTitle("");
           }
         }}
-        placeholder="Adicionar tarefa e pressionar Enter"
-        className="w-full bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none"
+        placeholder="Adicionar tarefa…"
+        className="w-full bg-transparent text-sm font-medium text-primary placeholder:font-normal placeholder:text-muted-foreground focus:outline-none"
       />
     </div>
   );
@@ -391,6 +392,9 @@ export function TaskListView({
     <div className="space-y-3">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
+        <TaskCreateDialog lists={lists} defaultListId={firstListId} />
+        <div className="mx-1 hidden h-6 w-px bg-border sm:block" />
+
         <div className="relative">
           <Search className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
