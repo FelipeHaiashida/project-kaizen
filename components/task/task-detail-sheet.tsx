@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Loader2, Trash2 } from "lucide-react";
+import { Check, Loader2, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import type { Priority } from "@prisma/client";
 
@@ -15,7 +15,7 @@ import { EPIC_COLORS } from "@/lib/validations/epic";
 import { SPRINT_COLORS } from "@/lib/validations/sprint";
 import { PRIORITIES } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -259,19 +259,30 @@ export function TaskDetailSheet({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[88vh] max-w-2xl flex-col gap-4 overflow-y-auto">
+      <DialogContent
+        hideClose
+        className="flex max-h-[88vh] max-w-2xl flex-col gap-4 overflow-y-auto"
+      >
         <DialogTitle className="sr-only">Detalhes da tarefa</DialogTitle>
-        <input
-          value={title}
-          onChange={(e) => {
-            const v = e.target.value;
-            setTitle(v);
-            debounce("title", () => commitCore({ title: v }));
-          }}
-          onBlur={() => commitCore({ title })}
-          className="w-full border-none bg-transparent pr-8 text-lg font-semibold focus:outline-none"
-          placeholder="Título da tarefa"
-        />
+        <div className="sticky top-0 z-10 -mx-6 -mt-6 flex items-center gap-2 border-b bg-background px-6 py-3">
+          <input
+            value={title}
+            onChange={(e) => {
+              const v = e.target.value;
+              setTitle(v);
+              debounce("title", () => commitCore({ title: v }));
+            }}
+            onBlur={() => commitCore({ title })}
+            className="min-w-0 flex-1 border-none bg-transparent text-lg font-semibold focus:outline-none"
+            placeholder="Título da tarefa"
+          />
+          <DialogClose
+            aria-label="Fechar"
+            className="shrink-0 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            <X className="h-4 w-4" />
+          </DialogClose>
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
