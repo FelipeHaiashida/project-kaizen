@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { Check, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Priority } from "@prisma/client";
 
@@ -90,38 +90,87 @@ export function TaskDetailSheet({
   const doneStatusId = statuses[statuses.length - 1]?.id;
   const firstStatusId = statuses[0]?.id;
 
+  // Espelho sempre atualizado dos campos "core" (evita salvar valores defasados).
+  const latest = useRef({ title, description, statusId, priority, dueDate, assigneeIds });
+  latest.current = { title, description, statusId, priority, dueDate, assigneeIds };
+
+  // Debounce por campo para os inputs de texto.
+  const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  useEffect(() => {
+    const t = timers.current;
+    return () => Object.values(t).forEach(clearTimeout);
+  }, []);
+  function debounce(key: string, fn: () => void, ms = 700) {
+    if (timers.current[key]) clearTimeout(timers.current[key]);
+    timers.current[key] = setTimeout(fn, ms);
+  }
+
+  type CorePatch = Partial<{
+    title: string;
+    description: string;
+    statusId: string;
+    priority: Priority;
+    dueDate: string | null;
+    assigneeIds: string[];
+  }>;
+
+  /** Salva os campos "core" (via updateTask) mesclando o patch com o estado atual. */
+  function commitCore(patch: CorePatch = {}) {
+    const s = latest.current;
+    const nextTitle = patch.title ?? s.title;
+    if (!nextTitle.trim()) return; // título é obrigatório — não salva vazio
+    startTransition(async () => {
+      const r = await updateTask(task.id, {
+        title: nextTitle,
+        description: patch.description ?? s.description,
+        statusId: patch.statusId ?? s.statusId,
+        priority: patch.priority ?? s.priority,
+        dueDate: patch.dueDate !== undefined ? patch.dueDate : s.dueDate || null,
+        assigneeIds: patch.assigneeIds ?? s.assigneeIds,
+      });
+      if (r.error) toast.error(r.error);
+      else router.refresh();
+    });
+  }
+
+  /** Helper genérico para salvar um campo com action própria. */
+  function commit(fn: () => Promise<{ error?: string } | void>) {
+    startTransition(async () => {
+      const r = await fn();
+      if (r && r.error) toast.error(r.error);
+      else router.refresh();
+    });
+  }
+
   function toggleAssignee(id: string) {
-    setAssigneeIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    const next = assigneeIds.includes(id)
+      ? assigneeIds.filter((x) => x !== id)
+      : [...assigneeIds, id];
+    setAssigneeIds(next);
+    commitCore({ assigneeIds: next });
   }
 
   function toggleTag(id: string) {
-    setTagIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    const next = tagIds.includes(id) ? tagIds.filter((x) => x !== id) : [...tagIds, id];
+    setTagIds(next);
+    commit(() => setTaskTags(task.id, next));
   }
 
-  function save() {
-    startTransition(async () => {
-      const result = await updateTask(task.id, {
-        title,
-        description,
-        statusId,
-        priority,
-        dueDate: dueDate || null,
-        assigneeIds,
-      });
-      if (result.error) {
-        toast.error(result.error);
-        return;
-      }
-      await setTaskTags(task.id, tagIds);
-      await setTaskEpic(task.id, epicId || null);
-      await setTaskSprint(task.id, sprintId || null);
-      await setTaskEstimate(task.id, estimate.trim() === "" ? null : Number(estimate));
-      for (const field of projectFields) {
-        await setTaskFieldValue(task.id, field.id, fieldValues[field.id] ?? null);
-      }
-      toast.success("Tarefa salva");
-      router.refresh();
-    });
+  function changeEpic(id: string) {
+    setEpicId(id);
+    commit(() => setTaskEpic(task.id, id || null));
+  }
+
+  function changeSprint(id: string) {
+    setSprintId(id);
+    commit(() => setTaskSprint(task.id, id || null));
+  }
+
+  function changeField(fieldId: string, value: string, immediate = false) {
+    setFieldValues((prev) => ({ ...prev, [fieldId]: value }));
+    const run = () => commit(() => setTaskFieldValue(task.id, fieldId, value || null));
+    if (immediate) run();
+    else debounce(`field-${fieldId}`, run);
   }
 
   function addEpic() {
@@ -134,7 +183,10 @@ export function TaskDetailSheet({
         toast.error(r.error);
         return;
       }
-      if (r.epicId) setEpicId(r.epicId);
+      if (r.epicId) {
+        setEpicId(r.epicId);
+        await setTaskEpic(task.id, r.epicId);
+      }
       setNewEpicName("");
       setCreatingEpic(false);
       toast.success("Épico criado");
@@ -152,7 +204,10 @@ export function TaskDetailSheet({
         toast.error(r.error);
         return;
       }
-      if (r.sprintId) setSprintId(r.sprintId);
+      if (r.sprintId) {
+        setSprintId(r.sprintId);
+        await setTaskSprint(task.id, r.sprintId);
+      }
       setNewSprintName("");
       setCreatingSprint(false);
       toast.success("Sprint criada");
@@ -208,7 +263,12 @@ export function TaskDetailSheet({
         <DialogTitle className="sr-only">Detalhes da tarefa</DialogTitle>
         <input
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            const v = e.target.value;
+            setTitle(v);
+            debounce("title", () => commitCore({ title: v }));
+          }}
+          onBlur={() => commitCore({ title })}
           className="w-full border-none bg-transparent pr-8 text-lg font-semibold focus:outline-none"
           placeholder="Título da tarefa"
         />
@@ -219,7 +279,10 @@ export function TaskDetailSheet({
             <select
               className={selectClass}
               value={statusId}
-              onChange={(e) => setStatusId(e.target.value)}
+              onChange={(e) => {
+                setStatusId(e.target.value);
+                commitCore({ statusId: e.target.value });
+              }}
             >
               {statuses.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -233,7 +296,11 @@ export function TaskDetailSheet({
             <select
               className={selectClass}
               value={priority}
-              onChange={(e) => setPriority(e.target.value as Priority)}
+              onChange={(e) => {
+                const v = e.target.value as Priority;
+                setPriority(v);
+                commitCore({ priority: v });
+              }}
             >
               {PRIORITIES.map((p) => (
                 <option key={p.value} value={p.value}>
@@ -246,7 +313,15 @@ export function TaskDetailSheet({
 
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Vencimento</Label>
-          <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          <Input
+            type="date"
+            value={dueDate}
+            onChange={(e) => {
+              const v = e.target.value;
+              setDueDate(v);
+              commitCore({ dueDate: v || null });
+            }}
+          />
         </div>
 
         <div className="space-y-1">
@@ -305,7 +380,7 @@ export function TaskDetailSheet({
               <select
                 className={selectClass}
                 value={epicId}
-                onChange={(e) => setEpicId(e.target.value)}
+                onChange={(e) => changeEpic(e.target.value)}
               >
                 <option value="">Nenhum</option>
                 {projectEpics.map((ep) => (
@@ -359,7 +434,7 @@ export function TaskDetailSheet({
               <select
                 className={selectClass}
                 value={sprintId}
-                onChange={(e) => setSprintId(e.target.value)}
+                onChange={(e) => changeSprint(e.target.value)}
               >
                 <option value="">Nenhuma</option>
                 {projectSprints.map((sp) => (
@@ -412,7 +487,16 @@ export function TaskDetailSheet({
             type="number"
             min={0}
             value={estimate}
-            onChange={(e) => setEstimate(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value;
+              setEstimate(v);
+              debounce("estimate", () =>
+                commit(() => setTaskEstimate(task.id, v.trim() === "" ? null : Number(v)))
+              );
+            }}
+            onBlur={() =>
+              commit(() => setTaskEstimate(task.id, estimate.trim() === "" ? null : Number(estimate)))
+            }
           />
         </div>
 
@@ -424,9 +508,7 @@ export function TaskDetailSheet({
                 id={`field-${f.id}`}
                 type="checkbox"
                 checked={fieldValues[f.id] === "true"}
-                onChange={(e) =>
-                  setFieldValues((prev) => ({ ...prev, [f.id]: e.target.checked ? "true" : "" }))
-                }
+                onChange={(e) => changeField(f.id, e.target.checked ? "true" : "", true)}
                 className="h-4 w-4"
               />
             ) : f.type === "DROPDOWN" ? (
@@ -434,7 +516,7 @@ export function TaskDetailSheet({
                 id={`field-${f.id}`}
                 className={selectClass}
                 value={fieldValues[f.id] ?? ""}
-                onChange={(e) => setFieldValues((prev) => ({ ...prev, [f.id]: e.target.value }))}
+                onChange={(e) => changeField(f.id, e.target.value, true)}
               >
                 <option value="">—</option>
                 {f.options.map((o) => (
@@ -448,7 +530,8 @@ export function TaskDetailSheet({
                 id={`field-${f.id}`}
                 type={f.type === "NUMBER" ? "number" : f.type === "DATE" ? "date" : "text"}
                 value={fieldValues[f.id] ?? ""}
-                onChange={(e) => setFieldValues((prev) => ({ ...prev, [f.id]: e.target.value }))}
+                onChange={(e) => changeField(f.id, e.target.value)}
+                onBlur={() => changeField(f.id, fieldValues[f.id] ?? "", true)}
               />
             )}
           </div>
@@ -456,7 +539,13 @@ export function TaskDetailSheet({
 
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Descrição</Label>
-          <RichTextEditor value={description} onChange={setDescription} />
+          <RichTextEditor
+            value={description}
+            onChange={(html) => {
+              setDescription(html);
+              debounce("description", () => commitCore({ description: html }));
+            }}
+          />
         </div>
 
         <TaskAttachments taskId={task.id} attachments={task.attachments} />
@@ -512,9 +601,19 @@ export function TaskDetailSheet({
             <Trash2 className="h-4 w-4 text-destructive" />
             Excluir
           </Button>
-          <Button size="sm" onClick={save} disabled={isPending}>
-            {isPending ? "Salvando..." : "Salvar"}
-          </Button>
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            {isPending ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Salvando…
+              </>
+            ) : (
+              <>
+                <Check className="h-3.5 w-3.5 text-primary" />
+                Salvo automaticamente
+              </>
+            )}
+          </span>
         </div>
       </DialogContent>
     </Dialog>
